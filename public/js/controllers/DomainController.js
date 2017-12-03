@@ -35,6 +35,26 @@ angular.module('DomainController', []).controller('DomainController', function($
 		  });
 	}
 
+	this.fetchFileContents = function() {
+		Domain.fetchFileContents($stateParams.id)
+		  .then(response => {
+		  	this.fileContents = response.data;
+		  })
+		  .catch((error) => {
+		    console.log(error)
+		  });
+	}
+
+	this.reloadFile = function() {
+		Domain.reloadFile($stateParams.id)
+		  .then(response => {
+		  	this.fileContents = response.data;
+		  })
+		  .catch((error) => {
+		    console.log(error)
+		  });
+	}
+
 	this.delete = function(id) {
 		if ($window.confirm('Delete this domain?')) {
 			Domain.delete(id)

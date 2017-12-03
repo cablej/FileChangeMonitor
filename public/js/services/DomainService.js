@@ -12,6 +12,14 @@ angular.module('Domain', []).service('Domain', ['$http', function($http) {
     return $http.get('/api/domains/' + id);
   }
 
+  this.fetchFileContents = function(id) {
+    return $http.get('/api/domains/' + id + '/fileContents');
+  }
+
+  this.reloadFile = function(id) {
+    return $http.post('/api/domains/' + id + '/reloadFile');
+  }
+
   this.delete = function(id) {
     return $http.delete('/api/domains/' + id);
   }

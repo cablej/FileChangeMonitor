@@ -8,7 +8,13 @@
 	  <div class="col-sm-8">
 	    <input ng-model="ctrl.domain.name" id="name" placeholder="Name" class="form-control"></input>
 	  </div>
-	</div>
+	  </div>
+	  <div class="form-group">
+	  <label for="url" class="col-sm-2 control-label">Url</label>
+	  <div class="col-sm-8">
+	    <input ng-model="ctrl.domain.url" id="url" placeholder="http://..." class="form-control"></input>
+	  </div>
+	  </div>
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
 	      <button type="submit" class="btn special" ng-click="ctrl.add()">Create</button>

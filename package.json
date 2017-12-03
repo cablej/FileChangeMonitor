@@ -5,6 +5,7 @@
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "method-override": "^2.3.9",
-    "mongoose": "^4.11.3"
+    "mongoose": "^4.11.3",
+    "paranoid-request": "^1.1.0"
   }
 }

@@ -1,30 +1,36 @@
-<div class="jumbotron" ng-init="ctrl.fetchOne()">
+<div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents()">
 	<h2>Results</h2>
 
 	<h3>{{ctrl.domain.name}}</h3>
+	<p><a href="{{ctrl.domain.url}}" target="_blank">{{ctrl.domain.url}}</a></p>
 	<p>Domain ID: {{ctrl.domain._id}}</p>
+	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button>
+	<br>
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
-	       				<a data-toggle="collapse" data-parent="#accordion" href="#nmap">Nmap</a>
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#contents">File contents</a>
 	      			</h4>
 				</div>
-				<div id="nmap" class="panel-collapse collapse">
+				<div id="contents" class="panel-collapse collapse">
 					<div class="panel-body">
 						<code>
-							Tool output here
+							{{ctrl.fileContents.data}}
 						</code>
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
-	       				<a data-toggle="collapse" data-parent="#accordion" href="#sublist3r">Sublist3r</a>
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls">Relative URLs</a>
 	      			</h4>
 				</div>
-				<div id="sublist3r" class="panel-collapse collapse">
+				<div id="urls" class="panel-collapse collapse">
 					<div class="panel-body">
 						<code>
 							Tool output here

@@ -2,9 +2,9 @@
 var mongoose = require('mongoose');
 
 const FileSchema = new mongoose.Schema({
-	name : String,
-	response : String,
-	params : [String]
+	name: String,
+	url: String,
+	fileName: String
 });
 
 FileSchema.path('name').validate(function(name) {
