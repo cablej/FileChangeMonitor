@@ -1,0 +1,36 @@
+<div class="jumbotron" ng-init="ctrl.fetchOne()">
+	<h2>Results</h2>
+
+	<h3>{{ctrl.domain.name}}</h3>
+	<p>Domain ID: {{ctrl.domain._id}}</p>
+		<div class="panel-group" id="accordion">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#nmap">Nmap</a>
+	      			</h4>
+				</div>
+				<div id="nmap" class="panel-collapse collapse">
+					<div class="panel-body">
+						<code>
+							Tool output here
+						</code>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#sublist3r">Sublist3r</a>
+	      			</h4>
+				</div>
+				<div id="sublist3r" class="panel-collapse collapse">
+					<div class="panel-body">
+						<code>
+							Tool output here
+						</code>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
