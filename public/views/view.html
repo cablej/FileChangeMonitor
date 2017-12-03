@@ -4,7 +4,7 @@
 	<h3>{{ctrl.domain.name}}</h3>
 	<p><a href="{{ctrl.domain.url}}" target="_blank">{{ctrl.domain.url}}</a></p>
 	<p>Domain ID: {{ctrl.domain._id}}</p>
-	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button>
+	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button><br><br>
 	<br>
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
@@ -15,9 +15,7 @@
 				</div>
 				<div id="contents" class="panel-collapse collapse">
 					<div class="panel-body">
-						<code>
-							{{ctrl.fileContents.data}}
-						</code>
+						<pre>{{ctrl.fileContents.data}}</pre>
 					</div>
 				</div>
 			</div>
