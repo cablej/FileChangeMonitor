@@ -20,7 +20,7 @@ module.exports = function(app) {
 	});
 
 	app.post('/api/domains', function(req, res) {
-	  Domain.create(req.body, (err, response) => {
+	  Domain.create(req.body, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			if (err.name == 'ValidationError') {
@@ -28,7 +28,12 @@ module.exports = function(app) {
 	  			}
 	  			return res.status(500).send();
 	  		}
-	      res.status(200).json(response);
+	  		domain.reloadFile(true, (err) => {
+	  			console.log('Error: ' + err);
+	  			return res.status(500).send();
+	  		}, (data) => {
+		      res.status(200).json(domain);
+	  		})
 	    });
 	});
 
@@ -43,20 +48,17 @@ module.exports = function(app) {
 	});
 
 	app.get('/api/domains/:id/fileContents', function(req, res) {
-	  Domain.findOne({ _id: req.params.id }, (err, response) => {
+	  Domain.findOne({ _id: req.params.id }, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
 	  		}
-	  		// Filter all non-alphanumeric characters from the id
-	  		var filteredId = response.id.replace(/\W/g, '');
-	  		fs.readFile('files/' + filteredId, 'utf8', function (err,data) {
-			  if (err) {
+	  		domain.getLocalContents((err) => {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
-			  }
+	  		}, (data) => {
 		      res.status(200).json({ 'data': data });
-			});
+	  		})
 	    });
 	});
 
@@ -66,7 +68,7 @@ module.exports = function(app) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
 	  		}
-	  		domain.fetchUrl((err) => {
+	  		domain.reloadFile(false, (err) => {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
 	  		}, (data) => {
