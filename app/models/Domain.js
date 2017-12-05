@@ -35,6 +35,27 @@ DomainSchema.methods = {
             success(data.Body.toString('utf-8'));
         });
     },
+    // is this function name too long? maybe... but it does what it says it does
+    // writes the file to the bucket and extracts urls, writes those to the bucket
+    writeToBucketAndExtractRelativeUrls(data, err, success) {
+        s3.putObject({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: this.getFilteredFileUrl(),
+            Body: data
+        }, (err, response) => {
+            if (err) return error(err);
+            let urls = this.extractRelativeUrls(data);
+            s3.putObject({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: 'urls-' + this.getFilteredFileUrl(),
+                Body: urls.join('\n')
+            }, (err, data) => {
+                if (err) return error(err);
+                console.log("The file was saved!");
+                success();
+            });
+        });
+    },
     extractRelativeUrls(data) {
         let stringDelimiters = ['"', '\'', '`'];
         let urls = new Set();
@@ -46,18 +67,15 @@ DomainSchema.methods = {
             }
         }
         console.log(urls)
-        return urls;
+        return  Array.from(urls);
     },
     reloadFile(isNew, error, success) {
         paranoid.get(this.url, (err, res, newData) => {
             if (err) return error(err);
             if (isNew) {
-                return s3.putObject({
-                    Bucket: process.env.AWS_BUCKET_NAME,
-                    Key: this.getFilteredFileUrl(),
-                    Body: newData
-                }, function(err, data) {
-                    if (err) return error(err);
+                return this.writeToBucketAndExtractRelativeUrls(newData, (err) => {
+                    return error(err);
+                }, () => {
                     console.log("The file was saved!");
                     success(newData);
                 });
