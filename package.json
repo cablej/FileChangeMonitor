@@ -2,11 +2,14 @@
   "name": "starter-node-angular",
   "main": "server.js",
   "dependencies": {
+    "aws-sdk": "^2.163.0",
     "body-parser": "^1.17.2",
     "diff": "^3.4.0",
+    "dotenv": "^4.0.0",
     "express": "^4.15.3",
     "method-override": "^2.3.9",
     "mongoose": "^4.11.3",
+    "mz": "^2.7.0",
     "paranoid-request": "^1.1.0"
   }
 }

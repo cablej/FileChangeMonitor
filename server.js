@@ -4,14 +4,12 @@ var app            = express();
 var mongoose       = require('mongoose');
 var bodyParser     = require('body-parser');
 var methodOverride = require('method-override');
+var dotenv         = require('dotenv').config();
 
 // configuration ===========================================
-	
-// config files
-var db = require('./config/db');
 
 var port = process.env.PORT || 3000; // set our port
-mongoose.connect(db.url || 'mongodb://localhost/bug-bounty-tool'); // connect to our mongoDB database (commented out after you enter in your own credentials)
+mongoose.connect(process.env.url || 'mongodb://localhost/bug-bounty-tool'); // connect to our mongoDB database (commented out after you enter in your own credentials)
 mongoose.connection.on('error', () => {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);

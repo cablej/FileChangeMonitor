@@ -54,11 +54,11 @@ module.exports = function(app) {
 	  			return res.status(500).send();
 	  		}
 	  		domain.getLocalContents((err) => {
-	  			console.log('Error: ' + err);
-	  			return res.status(500).send();
+  				console.log('Error: ' + err);
+  				return res.status(500).send();
 	  		}, (data) => {
-		      res.status(200).json({ 'data': data });
-	  		})
+		        res.status(200).json({ 'data': data });
+	  		});
 	    });
 	});
 

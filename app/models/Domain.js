@@ -1,8 +1,9 @@
 var Subdomain = require('./Subdomain');
 var paranoid = require("paranoid-request");
 var mongoose = require('mongoose');
-var fs = require('fs');
 var jsdiff = require('diff');
+var AWS = require('aws-sdk');
+var s3 = new AWS.S3();
 
 const DomainSchema = new mongoose.Schema({
     name : { type : String, default: '', index: true, unique: true },
@@ -24,11 +25,14 @@ DomainSchema.methods = {
     getFilteredFileUrl() {
         return this.id.replace(/\W/g, '');
     },
+    // returns a promise of the contents of the locally stored file
     getLocalContents(error, success) {
-        fs.readFile('files/' + this.getFilteredFileUrl(), 'utf8', (err,data) => {
-          if (err) return error(err);
-          this.extractRelativeUrls(data);
-          success(data);
+        s3.getObject({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: this.getFilteredFileUrl(),
+        }, (err, data) => {
+            if (err) return error(err);
+            success(data.Body.toString('utf-8'));
         });
     },
     extractRelativeUrls(data) {
@@ -48,7 +52,11 @@ DomainSchema.methods = {
         paranoid.get(this.url, (err, res, newData) => {
             if (err) return error(err);
             if (isNew) {
-                return fs.writeFile('files/' + this.getFilteredFileUrl(), newData, (err) => {
+                return s3.putObject({
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: this.getFilteredFileUrl(),
+                    Body: newData
+                }, function(err, data) {
                     if (err) return error(err);
                     console.log("The file was saved!");
                     success(newData);
@@ -77,12 +85,20 @@ DomainSchema.methods = {
                         }
                     }
                 }
-                console.log(diff)
+
                 if (modifications.length && numCharsModified / originalData.length > threshold) {
                     console.log("Modifications made, saving files.");
-                    fs.writeFile('files/' + this.getFilteredFileUrl(), newData, (err) => {
+                    s3.putObject({
+                        Bucket: process.env.AWS_BUCKET_NAME,
+                        Key: this.getFilteredFileUrl(),
+                        Body: newData
+                    }, (err, data) => {
                         if (err) return error(err);
-                        fs.writeFile('files/diff-' + this.getFilteredFileUrl(), JSON.stringify(diff), (err) => {
+                        s3.putObject({
+                            Bucket: process.env.AWS_BUCKET_NAME,
+                            Key: 'diff-' + this.getFilteredFileUrl(),
+                            Body: JSON.stringify(diff)
+                        }, (err, data) => {
                             if (err) return error(err);
                             console.log("The file was saved!");
                             success(newData);
