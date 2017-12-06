@@ -1,0 +1,6 @@
+{
+  "extends": ["airbnb-standard"],
+  "rules": {
+  	"indent": 0
+  }
+}
