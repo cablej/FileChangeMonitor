@@ -1,0 +1,28 @@
+<div class="jumbotron">
+	<h2>Login</h2>
+
+	<p>Login to File Change Monitor.</p>
+	<form class="form-horizontal" name="registerForm">
+	  <div class="form-group">
+	  <label for="name" class="col-sm-2 control-label">Username</label>
+	  <div class="col-sm-8">
+	    <input ng-model="ctrl.user.username" id="username" placeholder="Username" class="form-control"></input>
+	  </div>
+	  </div>
+	  <div class="form-group">
+	  <label for="name" class="col-sm-2 control-label">Password</label>
+	  <div class="col-sm-8">
+	    <input ng-model="ctrl.user.password" id="password" placeholder="Password" type="password" class="form-control"></input>
+        <div ng-messages="registerForm.password.$error" ng-show="registerForm.password.$touched || registerForm.$submitted">
+          <div ng-message="required">Password is required.</div>
+        </div>
+	  </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-10">
+	      <button type="submit" class="btn special" ng-click="ctrl.login()">Login</button>
+	    </div>
+	  </div>
+	<p>{{ formError }}</p>
+	</form>
+</div>

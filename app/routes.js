@@ -1,6 +1,7 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
 var Subdomain = require('./models/Subdomain');
+var auth = require('./auth/auth.service');
 var fs = require('fs');
 
 module.exports = function(app) {
@@ -9,8 +10,11 @@ module.exports = function(app) {
 	// handle things like api calls
 	// authentication routes
 
-	app.get('/api/domains', function(req, res) {
-	  Domain.find((err, response) => {
+	app.use('/auth', require('./auth'));
+	app.use('/user', require('./User'));
+
+	app.get('/api/domains', auth.ensureAuthenticated, function(req, res) {
+	  Domain.find({ user: req.user }, (err, response) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
@@ -19,7 +23,8 @@ module.exports = function(app) {
 	    });
 	});
 
-	app.post('/api/domains', function(req, res) {
+	app.post('/api/domains', auth.ensureAuthenticated, function(req, res) {
+	  req.body.user = req.user;
 	  Domain.create(req.body, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
@@ -37,8 +42,8 @@ module.exports = function(app) {
 	    });
 	});
 
-	app.get('/api/domains/:id', function(req, res) {
-	  Domain.findOne({ _id: req.params.id }, (err, response) => {
+	app.get('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
+	  Domain.findOne({ _id: req.params.id, user: req.user }, (err, response) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
@@ -47,8 +52,8 @@ module.exports = function(app) {
 	    });
 	});
 
-	app.get('/api/domains/:id/fileContents', function(req, res) {
-	  Domain.findOne({ _id: req.params.id }, (err, domain) => {
+	app.get('/api/domains/:id/fileContents', auth.ensureAuthenticated, function(req, res) {
+	  Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
@@ -62,8 +67,8 @@ module.exports = function(app) {
 	    });
 	});
 
-	app.post('/api/domains/:id/reloadFile', function(req, res) {
-	  Domain.findOne({ _id: req.params.id }, (err, domain) => {
+	app.post('/api/domains/:id/reloadFile', auth.ensureAuthenticated, function(req, res) {
+	  Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
@@ -77,8 +82,8 @@ module.exports = function(app) {
 	    });
 	});
 
-	app.delete('/api/domains/:id', function(req, res) {
-		Domain.findOne({ _id: req.params.id }, (err, domain) => {
+	app.delete('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
+		Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
 	  		if (err) {
 	  			console.log('Error: ' + err);
 	  			return res.status(500).send();
@@ -91,10 +96,6 @@ module.exports = function(app) {
           res.status(204).end();
         });
 	    });
-	});
-
-	app.post('/api/domains/:id/findSubdomains', function(req, res) {
-		// Run Sublist3r, save results as subdomains
 	});
 
 	// frontend routes =========================================================

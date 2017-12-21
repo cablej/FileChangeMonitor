@@ -4,5 +4,13 @@ angular.module('app',
 		'ui.router',
 		'appRoutes',
 		'DomainController',
-		'Domain'
-	]);
+		'Domain',
+		'UserController',
+		'LogoutController',
+		'User',
+		'satellizer'
+	])
+
+	.config(function($authProvider) {
+		
+	});

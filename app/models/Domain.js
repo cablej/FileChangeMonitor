@@ -6,10 +6,11 @@ let AWS = require('aws-sdk');
 let s3 = new AWS.S3();
 
 const DomainSchema = new mongoose.Schema({
-    name: { type : String, default: '', index: true, unique: true },
+    name: { type : String, default: ''},
     url: { type : String, default: '' },
     subdomains: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subdomain' }],
-    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }]
+    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }],
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 DomainSchema.pre('save', (next) => {

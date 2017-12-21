@@ -39,6 +39,8 @@ angular.module('DomainController', []).controller('DomainController', function($
 		Domain.fetchFileContents($stateParams.id)
 		  .then(response => {
 		  	this.fileContents = response.data;
+		  	this.fileContents.data[3] = this.formatDiff(this.fileContents.data[3]);
+		  	this.fileContents.data[1] = this.formatDiff(this.fileContents.data[1]);
 		  })
 		  .catch((error) => {
 		    console.log(error)
@@ -64,6 +66,21 @@ angular.module('DomainController', []).controller('DomainController', function($
 			  .catch((error) => {
 			    console.log(error)
 			  });
+		}
+	}
+
+	this.formatDiff = function(diff) {
+		if(diff == '') return '<i>No new content</i>';
+		try {
+			console.log(diff)
+			let parsed = JSON.parse(diff);
+			let formattedDiff = '';
+			for (diffString of parsed) {
+				formattedDiff += diffString.value;
+			}
+			return formattedDiff;
+		} catch (e) {
+			return '<i>No new content</i>';
 		}
 	}
 

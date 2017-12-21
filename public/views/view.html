@@ -10,6 +10,34 @@
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls">Relative URLs</a>
+	      			</h4>
+				</div>
+				<div id="urls" class="panel-collapse collapse">
+					<div class="panel-body">
+						<pre>{{ctrl.fileContents.data[2]}}</pre>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel-group" id="accordion">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls-diff">Relative URLs diff</a>
+	      			</h4>
+				</div>
+				<div id="urls-diff" class="panel-collapse collapse">
+					<div class="panel-body">
+						<pre ng-bind-html={{ctrl.fileContents.data[3]}}></pre>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel-group" id="accordion">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4 class="panel-title">
 	       				<a data-toggle="collapse" data-parent="#accordion" href="#contents">File contents</a>
 	      			</h4>
 				</div>
@@ -20,17 +48,16 @@
 				</div>
 			</div>
 		</div>
-
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
-	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls">Relative URLs</a>
+	       				<a data-toggle="collapse" data-parent="#accordion" href="#contents-diff">File contents diff</a>
 	      			</h4>
 				</div>
-				<div id="urls" class="panel-collapse collapse">
+				<div id="contents-diff" class="panel-collapse collapse">
 					<div class="panel-body">
-						<pre>{{ctrl.fileContents.data[2]}}</pre>
+						<pre>{{ctrl.fileContents.data[1]}}</pre>
 					</div>
 				</div>
 			</div>
