@@ -128,7 +128,7 @@ DomainSchema.methods = {
                 // file has been modified, diff the file
 
                 let threshold = 0;
-                let diff = jsdiff.diffChars(originalData, newData);
+                let diff = jsdiff.diffLines(originalData, newData);
                 let modifications = [];
                 let numCharsModified = 0;
                 for (let i=0; i < diff.length; i++) {
@@ -144,7 +144,7 @@ DomainSchema.methods = {
 
                 let originalUrls = originalDataArray[2]; // location of the url file
                 let newUrls = this.extractRelativeUrls(newData).join('\n')
-                let urlsDiff = jsdiff.diffChars(originalUrls, newUrls);
+                let urlsDiff = jsdiff.diffLines(originalUrls, newUrls);
                 if (modifications.length && numCharsModified > threshold) {
                     console.log("Modifications made, saving files.");
                     this.bulkWriteToBucket([{

@@ -72,11 +72,20 @@ angular.module('DomainController', []).controller('DomainController', function($
 	this.formatDiff = function(diff) {
 		if(diff == '') return '<i>No new content</i>';
 		try {
-			console.log(diff)
 			let parsed = JSON.parse(diff);
+			if(parsed.error) {
+				return '<i>No new content</i>';
+			}
+			console.log(parsed)
 			let formattedDiff = '';
 			for (diffString of parsed) {
-				formattedDiff += diffString.value;
+				if (diffString.added) {
+					formattedDiff += '<span style="color:green">' + diffString.value + '</span>';
+				} else if (diffString.removed) {
+					formattedDiff += '<span style="color:red">' + diffString.value + '</span>';
+				} else {
+					formattedDiff += diffString.value;
+				}
 			}
 			return formattedDiff;
 		} catch (e) {
@@ -84,4 +93,10 @@ angular.module('DomainController', []).controller('DomainController', function($
 		}
 	}
 
-});
+})
+
+.filter('to_trusted', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+    }]);

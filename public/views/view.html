@@ -29,7 +29,7 @@
 				</div>
 				<div id="urls-diff" class="panel-collapse collapse">
 					<div class="panel-body">
-						<pre ng-bind-html={{ctrl.fileContents.data[3]}}></pre>
+						<pre ng-bind-html="ctrl.fileContents.data[3] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
@@ -57,7 +57,7 @@
 				</div>
 				<div id="contents-diff" class="panel-collapse collapse">
 					<div class="panel-body">
-						<pre>{{ctrl.fileContents.data[1]}}</pre>
+						<pre ng-bind-html="ctrl.fileContents.data[1] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
