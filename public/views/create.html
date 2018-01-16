@@ -10,10 +10,17 @@
 	  </div>
 	  </div>
 	  <div class="form-group">
-	  <label for="url" class="col-sm-2 control-label">Url</label>
+	  <label for="url" class="col-sm-2 control-label">Base domain</label>
 	  <div class="col-sm-8">
-	    <input ng-model="ctrl.domain.url" id="url" placeholder="http://..." class="form-control"></input>
+	    <input ng-model="ctrl.domain.baseDomain" id="baseDomain" placeholder="http://..." class="form-control" ng-blur="ctrl.previewJSUrls()"></input>
 	  </div>
+	  </div>
+	  <div ng-show="ctrl.previewedUrls.length > 0">
+	  	<p>The following urls were identified. Select which urls to monitor.</p>
+	  </div>
+	  <div ng-repeat="url in ctrl.previewedUrls" class="form-group" class="">
+	  	<input type="checkbox" id="check{{$index}}" ng-model="url.selected" style="margin-left:200px; margin-right:20px"></input> 
+	  	<label for="check{{$index}}">{{url.url}}</label>
 	  </div>
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">

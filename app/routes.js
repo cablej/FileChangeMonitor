@@ -1,8 +1,10 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
+let paranoid = require("paranoid-request");
 var Subdomain = require('./models/Subdomain');
 var auth = require('./auth/auth.service');
 var fs = require('fs');
+var helperMethods = require('./helperMethods');
 
 module.exports = function(app) {
 
@@ -21,6 +23,14 @@ module.exports = function(app) {
 	  		}
 	      res.status(200).json(response);
 	    });
+	});
+
+	app.post('/api/domains/previewJSUrls', auth.ensureAuthenticated, function(req, res) {
+	  paranoid.get(req.body.url, (err, newRes, data) => {
+        if (err) return error(err);
+        urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
+	      res.status(200).json(urls);
+	  });
 	});
 
 	app.post('/api/domains', auth.ensureAuthenticated, function(req, res) {

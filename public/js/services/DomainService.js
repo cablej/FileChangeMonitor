@@ -12,6 +12,10 @@ angular.module('Domain', []).service('Domain', ['$http', function($http) {
     return $http.get('/api/domains/' + id);
   }
 
+  this.previewJSUrls = function(url) {
+    return $http.post('/api/domains/previewJSUrls', { url: url });
+  }
+
   this.fetchFileContents = function(id) {
     return $http.get('/api/domains/' + id + '/fileContents');
   }

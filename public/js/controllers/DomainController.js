@@ -4,6 +4,8 @@ angular.module('DomainController', []).controller('DomainController', function($
 
 	this.domain = {};
 
+	this.previewedUrls = [];
+
 	this.fetchAll = function() {
 		Domain.fetchAll()
 		  .then(response => {
@@ -18,6 +20,33 @@ angular.module('DomainController', []).controller('DomainController', function($
 		Domain.create(this.domain)
 		  .then(response => {
 		    $state.go('dashboard');
+		  })
+		  .catch((error) => {
+		  	$scope.formError = error.data.message;
+		    console.log(error)
+		  });
+	}
+
+	this.addMultiple = function() {
+		this.domain.urls = this.previewedUrls.map((url) => {
+			if(url.selected) return url.url;
+		});
+		Domain.create(this.domain)
+		  .then(response => {
+		    $state.go('dashboard');
+		  })
+		  .catch((error) => {
+		  	$scope.formError = error.data.message;
+		    console.log(error)
+		  });
+	}
+
+	this.previewJSUrls = function() {
+		Domain.previewJSUrls(this.domain.baseDomain)
+			.then(response => {
+				this.previewedUrls = response.data.map((url) => {
+					return { url: url }
+				});
 		  })
 		  .catch((error) => {
 		  	$scope.formError = error.data.message;
