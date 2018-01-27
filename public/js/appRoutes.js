@@ -8,13 +8,13 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      controller: 'UserController',
 	      controllerAs: 'ctrl'
 	    })
-	    .state('login', {
+    .state('login', {
 	      url: '/login',
 	      templateUrl: 'views/login.html',
 	      controller: 'UserController',
 	      controllerAs: 'ctrl'
 	    })
-	    .state('logout', {
+    .state('logout', {
 	      url: '/logout',
 	      template: null,
 	      controller: 'LogoutController'
@@ -32,9 +32,21 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      controller: 'DomainController',
 	      controllerAs: 'ctrl'
 	    })
+		.state('editDomain', {
+	      url: '/domain/:id/edit',
+	      templateUrl: 'views/editDomain.html',
+	      controller: 'DomainController',
+	      controllerAs: 'ctrl'
+	    })
 		.state('viewFile', {
 	      url: '/file/:id/',
 	      templateUrl: 'views/viewFile.html',
+	      controller: 'FileController',
+	      controllerAs: 'ctrl'
+	    })
+		.state('editFile', {
+	      url: '/file/:id/edit',
+	      templateUrl: 'views/editFile.html',
 	      controller: 'FileController',
 	      controllerAs: 'ctrl'
 	    })

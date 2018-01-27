@@ -12,14 +12,27 @@ angular.module('FileController', []).controller('FileController', function($scop
       });
   }
 
+  this.update = function() {
+    this.loading = true;
+    File.update(this.file)
+      .then(response => {
+        $state.go('viewFile', { id: this.file._id });
+      })
+      .catch((error) => {
+        this.loading = false;
+        $scope.formError = error.data.message;
+        console.log(error)
+      });
+  }
+
   this.fetchFileContents = function() {
     this.loading = true;
     File.fetchFileContents($stateParams.id)
       .then(response => {
         this.fileContents = response.data;
 
-        this.fileContents.data[0] = this.fileContents.data[0].replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        this.fileContents.data[2] = this.fileContents.data[2].replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        this.fileContents.data[0] = this.filterString(this.fileContents.data[0]);
+        this.fileContents.data[2] = this.filterString(this.fileContents.data[2]);
 
         if(this.fileContents.data[0].trim() == '') {
           this.fileContents.data[0] = '<i>Empty file</i>';
@@ -61,9 +74,9 @@ angular.module('FileController', []).controller('FileController', function($scop
       let formattedDiff = '';
       for (diffString of parsed) {
         if (diffString.added) {
-          formattedDiff += '<span style="color:green">' + diffString.value + '</span>';
+          formattedDiff += '<span style="color:green">' + this.filterString(diffString.value) + '</span>';
         } else if (diffString.removed) {
-          formattedDiff += '<span style="color:red">' + diffString.value + '</span>';
+          formattedDiff += '<span style="color:red">' + this.filterString(diffString.value) + '</span>';
         } else {
           // formattedDiff += diffString.value;
         }
@@ -72,6 +85,10 @@ angular.module('FileController', []).controller('FileController', function($scop
     } catch (e) {
       return '<i>No new content</i>';
     }
+  }
+
+  this.filterString = function(string) {
+    return string.replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
 })

@@ -4,6 +4,10 @@ angular.module('Domain', []).service('Domain', ['$http', function($http) {
     return $http.post('/api/domains', object);
   }
 
+  this.update = function(object) {
+    return $http.post('/api/domains/' + object._id, object);
+  }
+
   this.fetchAll = function() {
     return $http.get('/api/domains');
   }

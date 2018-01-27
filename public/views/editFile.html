@@ -1,0 +1,45 @@
+<div class="jumbotron" ng-init="ctrl.fetchOne();">
+  <h2>Edit</h2>
+
+  <p>Edit file.</p>
+  <form class="form-horizontal">
+    <div class="form-group">
+    <label for="url" class="col-sm-2 control-label">Url</label>
+    <div class="col-sm-8">
+      <input ng-model="ctrl.file.url" id="url" placeholder="Url" class="form-control"></input>
+    </div>
+    </div>
+    <p>Select the frequency that the file is polled for changes.</p>
+    <div class="form-group">
+    <label for="url" class="col-sm-2 control-label">Poll Time</label>
+    <div class="col-sm-8">
+      <input ng-model="ctrl.file.pollTime" id="pollTime" placeholder="60" class="form-control"></input>
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="notifyThreshold" class="col-sm-2 control-label">Notify Threshold</label>
+    <div class="col-sm-8">
+      <input ng-model="ctrl.file.notifyThreshold" id="notifyThreshold" placeholder="0" class="form-control"></input>
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="notifyThresholdUnit" class="col-sm-2 control-label">Notify Threshold Unit</label>
+    <div class="col-sm-8">
+      <select name="singleSelect" ng-model="ctrl.file.notifyThresholdUnit" id="notifyThresholdUnit" class="form-control">
+        <option value="urls">New Urls</option>
+        <option value="characters">Characters</option>
+      </select>
+    </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn special" ng-click="ctrl.update()">Save</button>
+        <button type="submit" class="btn btn-default" ui-sref="dashboard">Cancel</button>
+      </div>
+    </div>
+    <span data-ng-show="ctrl.loading">
+      <center><i class="fa fa-spinner fa-spin fa-3x"></i></center>
+    </span>
+  <p>{{ formError }}</p>
+  </form>
+</div>

@@ -48,6 +48,19 @@ angular.module('DomainController', []).controller('DomainController', function($
 		  });
 	}
 
+	this.update = function() {
+		this.loading = true;
+		Domain.update(this.domain)
+		  .then(response => {
+		    $state.go('viewDomain', { id: this.domain._id });
+		  })
+		  .catch((error) => {
+		  	this.loading = false;
+		  	$scope.formError = error.data.message;
+		    console.log(error)
+		  });
+	}
+
 	this.previewJSUrls = function() {
 		this.loading = true;
 		var baseDomain = this.domain.baseDomain.startsWith('http') ?

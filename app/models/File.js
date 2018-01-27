@@ -8,13 +8,30 @@ var Promise = require("bluebird");
 
 const FileSchema = new mongoose.Schema({
   url: String,
+  pollTime: {
+    type: Number,
+    validate: {
+      validator: function(v) {
+        return v > 60 // Min poll time
+      },
+      message: 'Poll time must be at least 1 minute.'
+    }
+  },
+  notifyThreshold: {
+    type: Number,
+    validate: {
+      validator: function(v) {
+        return v >= 0
+      },
+      message: 'Threshold must be positive'
+    }
+  },
+  notifyThresholdUnit: {
+    type: String,
+    enum: ['characters', 'urls'],
+  },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
-
-// FileSchema.path('name').validate(function(name) {
-//   if (name == '') return false;
-//   return true;
-// }, 'The name is not valid.');
 
 FileSchema.methods = {
   getFilteredFileUrl() {

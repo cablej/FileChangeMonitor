@@ -35,9 +35,10 @@ module.exports = function(app) {
   });
 
   app.post('/api/domains', auth.ensureAuthenticated, function(req, res) {
-    req.body.user = req.user;
-    console.log(req.body)
-    Domain.create(req.body, (err, domain) => {
+    Domain.create({
+      name: req.body.name,
+      user: req.user
+    }, (err, domain) => {
         var files = [];
         for (url of req.body.urls) {
           files.push(domain.addFile(url));
@@ -52,6 +53,18 @@ module.exports = function(app) {
       });
   });
 
+  app.post('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
+    Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
+        if (err) {
+          console.log('Error: ' + err);
+          return res.status(500).send();
+        }
+        domain.name = req.body.name;
+        domain.save();
+        res.status(200).json(domain);
+      });
+  });
+
   app.get('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
     Domain.findOne({ _id: req.params.id, user: req.user })
       .populate('files')
@@ -61,6 +74,21 @@ module.exports = function(app) {
           return res.status(500).send();
         }
         res.status(200).json(response);
+      });
+  });
+
+  app.post('/api/files/:id', auth.ensureAuthenticated, function(req, res) {
+    File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
+        if (err) {
+          console.log('Error: ' + err);
+          return res.status(500).send();
+        }
+        file.url = req.body.url;
+        file.pollTime = req.body.pollTime || 3600;
+        file.notifyThreshold = req.body.notifyThreshold || 0;
+        file.notifyThresholdUnit = req.body.notifyThresholdUnit || 'urls';
+        file.save();
+        res.status(200).json(file);
       });
   });
 

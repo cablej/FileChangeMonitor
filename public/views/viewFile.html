@@ -3,11 +3,15 @@
 
 	<p><a href="{{ctrl.file.url}}" target="_blank">{{ctrl.file.url}}</a></p>
 	<p>File ID: {{ctrl.file._id}}</p>
-	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button><br><br>
+	<p>Poll time: {{ctrl.file.pollTime}}</p>
+	<p>Notify threshold: {{ctrl.file.notifyThreshold}}</p>
+	<p>Notify threshold unit: {{ctrl.file.notifyThresholdUnit}}</p>
+	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button>
+  <button ui-sref="editFile({ id: ctrl.file._id })" class="btn">Edit</button>
 	<span data-ng-show="ctrl.loading">
 		<center><i class="fa fa-spinner fa-spin fa-3x"></i></center>
 	</span>
-	<br>
+  <br><br>
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
