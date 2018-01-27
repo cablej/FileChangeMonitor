@@ -1,21 +1,28 @@
 // grab the mongoose module
-var mongoose = require('mongoose');
+let paranoid = require("paranoid-request");
+let mongoose = require('mongoose');
+let jsdiff = require('diff');
+let AWS = require('aws-sdk');
+let s3 = new AWS.S3();
+var Promise = require("bluebird");
 
 const FileSchema = new mongoose.Schema({
-	url: String
+  url: String,
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
-FileSchema.path('name').validate(function(name) {
-  if (name == '') return false;
-  return true;
-}, 'The name is not valid.');
+// FileSchema.path('name').validate(function(name) {
+//   if (name == '') return false;
+//   return true;
+// }, 'The name is not valid.');
 
 FileSchema.methods = {
   getFilteredFileUrl() {
       return this.id.replace(/\W/g, '');
   },
-  // returns a promise of the contents of the locally stored file
-  getLocalContents(error, success) {
+  // returns a promise of the contents of the remotely stored file
+  // TODO: actually return a promise?
+  getRemoteContents(error, success) {
       this.bulkReadFromBucket([{
           key: this.getFilteredFileUrl()
       }, {
@@ -84,7 +91,6 @@ FileSchema.methods = {
               urls.add('/' + url);
           }
       }
-      console.log(urls)
       return  Array.from(urls);
   },
   reloadFile(isNew, error, success) {
@@ -101,14 +107,14 @@ FileSchema.methods = {
                   console.log(err);
                   return error(err);
               }, (newData) => {
-                  console.log("The file was saved!");
                   success(newData);
               });
           }
-          this.getLocalContents((err) => {
+          this.getRemoteContents((err) => {
               return error(err);
           }, (originalDataArray) => {
               let originalData = originalDataArray[0] //TODO: check for error here
+              if (typeof originalData !== 'string') originalData = '';
               if (newData == originalData) { // file has not been modified, return
                   console.log('File has not been modified.');
                   return success(originalData);
@@ -123,7 +129,6 @@ FileSchema.methods = {
                   let part = diff[i];
                   if (part.added || part.removed) {
                       if (part.value.replace(/\s+/g, '') != '') { //string is not empty
-                          console.log('non-empty string: ' + part.value)
                           modifications.push(part);
                           numCharsModified += part.count;
                       }
@@ -131,6 +136,7 @@ FileSchema.methods = {
               }
 
               let originalUrls = originalDataArray[2]; // location of the url file
+              if (typeof originalUrls !== 'string') originalUrls = '';
               let newUrls = this.extractRelativeUrls(newData).join('\n')
               let urlsDiff = jsdiff.diffLines(originalUrls, newUrls);
               if (modifications.length && numCharsModified > threshold) {
@@ -150,7 +156,6 @@ FileSchema.methods = {
                   }], (err) => {
                       return error(err);
                   }, (response) => {
-                      console.log("The file was saved!");
                       success(response);
                   });
               }

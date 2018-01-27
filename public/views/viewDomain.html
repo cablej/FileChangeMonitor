@@ -1,0 +1,17 @@
+<div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents()">
+  <h3>{{ctrl.domain.name}}</h3>
+  <p>Domain ID: {{ctrl.domain._id}}</p>
+  <br>
+  <table class="table table-striped table-bordered">
+  <tr><th>Url</th><th>Actions</th></tr>
+  <tr ng-repeat="url in ctrl.domain.files">
+    <td class="col-md-8">
+      {{ url.url }}
+    </td>
+    <td class="col-md-4">
+      <button ui-sref="viewFile({ id: url._id })" class="btn">View</button>
+      <button class="btn btn-danger" ng-click="ctrl.deleteFile(url._id)">Delete</button>
+    </td>
+  </tr>
+  </table>
+</div>

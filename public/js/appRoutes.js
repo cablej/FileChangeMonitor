@@ -26,10 +26,16 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      controller: 'DomainController',
 	      controllerAs: 'ctrl'
 	    })
-		.state('view', {
-	      url: '/:id/view',
-	      templateUrl: 'views/view.html',
+		.state('viewDomain', {
+	      url: '/domain/:id/',
+	      templateUrl: 'views/viewDomain.html',
 	      controller: 'DomainController',
+	      controllerAs: 'ctrl'
+	    })
+		.state('viewFile', {
+	      url: '/file/:id/',
+	      templateUrl: 'views/viewFile.html',
+	      controller: 'FileController',
 	      controllerAs: 'ctrl'
 	    })
 		.state('create', {

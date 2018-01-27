@@ -1,10 +1,12 @@
 <div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents()">
-	<h2>Results</h2>
+	<h2>File Information</h2>
 
-	<h3>{{ctrl.domain.name}}</h3>
-	<p><a href="{{ctrl.domain.url}}" target="_blank">{{ctrl.domain.url}}</a></p>
-	<p>Domain ID: {{ctrl.domain._id}}</p>
+	<p><a href="{{ctrl.file.url}}" target="_blank">{{ctrl.file.url}}</a></p>
+	<p>File ID: {{ctrl.file._id}}</p>
 	<button ng-click="ctrl.reloadFile()" class="btn">Reload url</button><br><br>
+	<span data-ng-show="ctrl.loading">
+		<center><i class="fa fa-spinner fa-spin fa-3x"></i></center>
+	</span>
 	<br>
 		<div class="panel-group" id="accordion">
 			<div class="panel panel-default">
@@ -13,9 +15,9 @@
 	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls">Relative URLs</a>
 	      			</h4>
 				</div>
-				<div id="urls" class="panel-collapse collapse">
+				<div id="urls" class="">
 					<div class="panel-body">
-						<pre>{{ctrl.fileContents.data[2]}}</pre>
+						<pre ng-bind-html="ctrl.fileContents.data[2] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
@@ -27,7 +29,7 @@
 	       				<a data-toggle="collapse" data-parent="#accordion" href="#urls-diff">Relative URLs diff</a>
 	      			</h4>
 				</div>
-				<div id="urls-diff" class="panel-collapse collapse">
+				<div id="urls-diff" class="">
 					<div class="panel-body">
 						<pre ng-bind-html="ctrl.fileContents.data[3] | to_trusted"></pre>
 					</div>
@@ -41,9 +43,9 @@
 	       				<a data-toggle="collapse" data-parent="#accordion" href="#contents">File contents</a>
 	      			</h4>
 				</div>
-				<div id="contents" class="panel-collapse collapse">
+				<div id="contents" class="">
 					<div class="panel-body">
-						<pre>{{ctrl.fileContents.data[0]}}</pre>
+						<pre ng-bind-html="ctrl.fileContents.data[0] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
@@ -55,7 +57,7 @@
 	       				<a data-toggle="collapse" data-parent="#accordion" href="#contents-diff">File contents diff</a>
 	      			</h4>
 				</div>
-				<div id="contents-diff" class="panel-collapse collapse">
+				<div id="contents-diff" class="">
 					<div class="panel-body">
 						<pre ng-bind-html="ctrl.fileContents.data[1] | to_trusted"></pre>
 					</div>

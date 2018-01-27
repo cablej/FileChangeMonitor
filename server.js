@@ -9,7 +9,7 @@ var dotenv         = require('dotenv').config();
 // configuration ===========================================
 
 var port = process.env.PORT || 3000; // set our port
-mongoose.connect(process.env.url || 'mongodb://localhost/bug-bounty-tool'); // connect to our mongoDB database (commented out after you enter in your own credentials)
+mongoose.connect(process.env.MONGO_URI); // connect to our mongoDB database (commented out after you enter in your own credentials)
 mongoose.connection.on('error', () => {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);

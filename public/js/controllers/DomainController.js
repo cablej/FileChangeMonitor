@@ -17,38 +17,50 @@ angular.module('DomainController', []).controller('DomainController', function($
 	}
 
 	this.add = function() {
+		this.loading = true;
 		Domain.create(this.domain)
 		  .then(response => {
 		    $state.go('dashboard');
 		  })
 		  .catch((error) => {
+		  	this.loading = false;
 		  	$scope.formError = error.data.message;
 		    console.log(error)
 		  });
 	}
 
 	this.addMultiple = function() {
-		this.domain.urls = this.previewedUrls.map((url) => {
-			if(url.selected) return url.url;
-		});
+		this.loading = true;
+		this.domain.urls = [];
+		for (url of this.previewedUrls) {
+			if(url.selected) {
+				this.domain.urls.push(url.url);
+			}
+		}
 		Domain.create(this.domain)
 		  .then(response => {
 		    $state.go('dashboard');
 		  })
 		  .catch((error) => {
+		  	this.loading = false;
 		  	$scope.formError = error.data.message;
 		    console.log(error)
 		  });
 	}
 
 	this.previewJSUrls = function() {
-		Domain.previewJSUrls(this.domain.baseDomain)
+		this.loading = true;
+		var baseDomain = this.domain.baseDomain.startsWith('http') ?
+			this.domain.baseDomain : 'http://' + this.domain.baseDomain;
+		Domain.previewJSUrls(baseDomain)
 			.then(response => {
+				this.loading = false;
 				this.previewedUrls = response.data.map((url) => {
 					return { url: url }
 				});
 		  })
 		  .catch((error) => {
+				this.loading = false;
 		  	$scope.formError = error.data.message;
 		    console.log(error)
 		  });
@@ -58,28 +70,6 @@ angular.module('DomainController', []).controller('DomainController', function($
 		Domain.fetchOne($stateParams.id)
 		  .then(response => {
 		  	this.domain = response.data;
-		  })
-		  .catch((error) => {
-		    console.log(error)
-		  });
-	}
-
-	this.fetchFileContents = function() {
-		Domain.fetchFileContents($stateParams.id)
-		  .then(response => {
-		  	this.fileContents = response.data;
-		  	this.fileContents.data[3] = this.formatDiff(this.fileContents.data[3]);
-		  	this.fileContents.data[1] = this.formatDiff(this.fileContents.data[1]);
-		  })
-		  .catch((error) => {
-		    console.log(error)
-		  });
-	}
-
-	this.reloadFile = function() {
-		Domain.reloadFile($stateParams.id)
-		  .then(response => {
-		  	this.fileContents = response.data;
 		  })
 		  .catch((error) => {
 		    console.log(error)
@@ -98,34 +88,4 @@ angular.module('DomainController', []).controller('DomainController', function($
 		}
 	}
 
-	this.formatDiff = function(diff) {
-		if(diff == '') return '<i>No new content</i>';
-		try {
-			let parsed = JSON.parse(diff);
-			if(parsed.error) {
-				return '<i>No new content</i>';
-			}
-			console.log(parsed)
-			let formattedDiff = '';
-			for (diffString of parsed) {
-				if (diffString.added) {
-					formattedDiff += '<span style="color:green">' + diffString.value + '</span>';
-				} else if (diffString.removed) {
-					formattedDiff += '<span style="color:red">' + diffString.value + '</span>';
-				} else {
-					formattedDiff += diffString.value;
-				}
-			}
-			return formattedDiff;
-		} catch (e) {
-			return '<i>No new content</i>';
-		}
-	}
-
-})
-
-.filter('to_trusted', ['$sce', function($sce){
-        return function(text) {
-            return $sce.trustAsHtml(text);
-        };
-    }]);
+});
