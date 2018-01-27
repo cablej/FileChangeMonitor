@@ -27,6 +27,7 @@ module.exports = function(app) {
 
   app.post('/api/domains/previewJSUrls', auth.ensureAuthenticated, function(req, res) {
     paranoid.get(req.body.url, (err, newRes, data) => {
+        console.log(err);
         if (err) return res.status(500).send();
         urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
         res.status(200).json(urls);
