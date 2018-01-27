@@ -1,10 +1,50 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
+var User = require('./User/user.model');
 let paranoid = require("paranoid-request");
 var auth = require('./auth/auth.service');
 var fs = require('fs');
 var helperMethods = require('./helperMethods');
-var Promise = require("bluebird");
+var Promise = require('bluebird');
+var CronJob = require('cron').CronJob;
+
+// Poll periodically to check for changes in files
+// runs every minute
+new CronJob('0,15,30,45 * * * * *', function() {
+  // First, we need to decide which files to poll for updates.
+  var time = Math.floor(new Date().getTime() / 1000);
+  File.find()
+  .select('+pollOffset')
+  .exec((err, response) => {
+    for (file of response) {
+      var numMinutes = Math.floor(time / 60);
+      var pollMinutes = Math.floor(file.pollTime / 60);
+      var offsetMinutes = Math.floor(file.pollOffset / 60);
+      if (numMinutes % pollMinutes == offsetMinutes) {
+        if (file._id != '5a6bc5bb40cfd04ea96ccf9a') continue;
+        console.log("we're rolling")
+        file.reloadFile(false, (err) => {
+          console.log(err);
+        }, (fileResponse) => {
+          if (!fileResponse.modified) return;
+          console.log(fileResponse);
+          if ((file.notifyThresholdUnit == 'characters' && fileResponse.numLinesModified >= file.notifyThreshold)
+               || file.notifyThresholdUnit == 'urls' && fileResponse.numUrlLinesModified >= file.notifyThreshold) {
+            User.findOne({ _id: file.user}, (userErr, user) => {
+              if (userErr) {
+                console.log(userErr);
+                return;
+              }
+              console.log(user)
+              console.log('and we are off!')
+              helperMethods.sendUpdateEmail(user.email, file.url, fileResponse)
+            });
+          }
+        });
+      }
+    }
+  });
+}, null, true, 'America/Los_Angeles');
 
 module.exports = function(app) {
 
@@ -27,8 +67,11 @@ module.exports = function(app) {
 
   app.post('/api/domains/previewJSUrls', auth.ensureAuthenticated, function(req, res) {
     paranoid.get(req.body.url, (err, newRes, data) => {
-        console.log(err);
-        if (err) return res.status(500).send();
+        if (err) {
+          console.log(err);
+          return res.status(500).send();
+        }
+        console.log(data)
         urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
         res.status(200).json(urls);
     });
@@ -87,7 +130,11 @@ module.exports = function(app) {
         file.pollTime = req.body.pollTime || 3600;
         file.notifyThreshold = req.body.notifyThreshold || 0;
         file.notifyThresholdUnit = req.body.notifyThresholdUnit || 'urls';
-        file.save();
+        file.save((err) => {
+          if (err) {
+            console.log(err)
+          }
+        });
         res.status(200).json(file);
       });
   });

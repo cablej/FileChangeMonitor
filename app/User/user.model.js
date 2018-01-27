@@ -6,8 +6,8 @@ var userSchema = new mongoose.Schema({
   username: { type: String, unique: true, lowercase: true },
   email: { type: String, lowercase: true },
   password: { type: String, select: false },
-  resetPasswordToken: String,
-  resetPasswordTokenExpiration: Date
+  resetPasswordToken: { type: String, select: false },
+  resetPasswordTokenExpiration: { type: Date, select: false }
 });
 
 userSchema.path('username').validate((username) => {

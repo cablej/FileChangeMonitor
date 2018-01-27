@@ -5,6 +5,7 @@ let jsdiff = require('diff');
 let AWS = require('aws-sdk');
 let s3 = new AWS.S3();
 var Promise = require("bluebird");
+var helperMethods = require('../helperMethods');
 
 const FileSchema = new mongoose.Schema({
   url: String,
@@ -12,25 +13,41 @@ const FileSchema = new mongoose.Schema({
     type: Number,
     validate: {
       validator: function(v) {
-        return v > 60 // Min poll time
+        return v >= 60 // Min poll time
       },
       message: 'Poll time must be at least 1 minute.'
-    }
+    },
+    default: 3600
   },
   notifyThreshold: {
     type: Number,
     validate: {
       validator: function(v) {
-        return v >= 0
+        return v >= 1
       },
       message: 'Threshold must be positive'
-    }
+    },
+    default: 1
   },
   notifyThresholdUnit: {
     type: String,
     enum: ['characters', 'urls'],
+    default: 'urls'
+  },
+  pollOffset: {
+    type: Number,
+    select: false
   },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+});
+
+FileSchema.pre('save', function (next) {
+  if (this.pollTime && (!this.pollOffset || this.isModified('pollTime'))) {
+    // set poll offset to random number for minute it processes
+    this.pollOffset = helperMethods.randomInt(0, this.pollTime - 1);
+    this.markModified('pollOffset');
+  }
+  next();
 });
 
 FileSchema.methods = {
@@ -79,6 +96,7 @@ FileSchema.methods = {
   },
   // writes an array of multiple data objects to the bucket
   bulkWriteToBucket(dataArray, error, success) {
+    return success({});
       let dataObject = dataArray.pop();
       s3.putObject({
           Bucket: process.env.AWS_BUCKET_NAME,
@@ -110,74 +128,93 @@ FileSchema.methods = {
       }
       return  Array.from(urls);
   },
+  numLinesModified(diff) {
+    let numLinesModified = 0;
+    for (let i=0; i < diff.length; i++) {
+        let part = diff[i];
+        if (part.added || part.removed) {
+            if (part.value.replace(/\s+/g, '') != '') { //string is not empty
+                numLinesModified += part.count;
+            }
+        }
+    }
+    return numLinesModified;
+  },
   reloadFile(isNew, error, success) {
-      paranoid.get(this.url, (err, res, newData) => {
-          if (err) return error(err);
-          if (isNew) {
-              return this.bulkWriteToBucket([{
-                  data: newData,
-                  key: this.getFilteredFileUrl()
-              }, {
-                  data: this.extractRelativeUrls(newData).join('\n'),
-                  key: 'urls-' + this.getFilteredFileUrl()
-              }], (err) => {
-                  console.log(err);
-                  return error(err);
-              }, (newData) => {
-                  success(newData);
-              });
-          }
-          this.getRemoteContents((err) => {
-              return error(err);
-          }, (originalDataArray) => {
-              let originalData = originalDataArray[0] //TODO: check for error here
-              if (typeof originalData !== 'string') originalData = '';
-              if (newData == originalData) { // file has not been modified, return
-                  console.log('File has not been modified.');
-                  return success(originalData);
-              }
-              // file has been modified, diff the file
+    paranoid.get(this.url, (err, res, newData) => {
+        if (err) return error(err);
+        if (isNew) {
+            return this.bulkWriteToBucket([{
+                data: newData,
+                key: this.getFilteredFileUrl()
+            }, {
+                data: this.extractRelativeUrls(newData).join('\n'),
+                key: 'urls-' + this.getFilteredFileUrl()
+            }], (err) => {
+                console.log(err);
+                return error(err);
+            }, (newData) => {
+                success({
+                  modified: false,
+                  data: newData
+                });
+            });
+        }
+        this.getRemoteContents((err) => {
+            return error(err);
+        }, (originalDataArray) => {
+            let originalData = originalDataArray[0] //TODO: check for error here
+            if (typeof originalData !== 'string') originalData = '';
+            if (newData == originalData) { // file has not been modified, return
+                console.log('File has not been modified.');
+                return success({
+                  modified: false,
+                  data: originalData
+                });
+            }
+            // file has been modified, diff the file
 
-              let threshold = 0;
-              let diff = jsdiff.diffLines(originalData, newData);
-              let modifications = [];
-              let numCharsModified = 0;
-              for (let i=0; i < diff.length; i++) {
-                  let part = diff[i];
-                  if (part.added || part.removed) {
-                      if (part.value.replace(/\s+/g, '') != '') { //string is not empty
-                          modifications.push(part);
-                          numCharsModified += part.count;
-                      }
-                  }
-              }
+            let threshold = 0;
+            let diff = jsdiff.diffLines(originalData, newData);
+            let numLinesModified = this.numLinesModified(diff);
 
-              let originalUrls = originalDataArray[2]; // location of the url file
-              if (typeof originalUrls !== 'string') originalUrls = '';
-              let newUrls = this.extractRelativeUrls(newData).join('\n')
-              let urlsDiff = jsdiff.diffLines(originalUrls, newUrls);
-              if (modifications.length && numCharsModified > threshold) {
-                  console.log("Modifications made, saving files.");
-                  this.bulkWriteToBucket([{
-                      data: newData,
-                      key: this.getFilteredFileUrl()
+            let originalUrls = originalDataArray[2]; // location of the url file
+            if (typeof originalUrls !== 'string') originalUrls = '';
+            let newUrls = this.extractRelativeUrls(newData).join('\n')
+            let urlsDiff = jsdiff.diffLines(originalUrls, newUrls);
+            let numUrlLinesModified = this.numLinesModified(urlsDiff);
+            if (numLinesModified > threshold) {
+                console.log("Modifications made, saving files.");
+                var filesToWrite = [{
+                    data: newData,
+                    key: this.getFilteredFileUrl()
+                }, {
+                    data: JSON.stringify(diff),
+                    key: 'diff-' + this.getFilteredFileUrl()
+                }];
+                if (numUrlLinesModified > threshold) {
+                  filesToWrite.push({
+                    data: newUrls,
+                    key: 'urls-' + this.getFilteredFileUrl()
                   }, {
-                      data: JSON.stringify(diff),
-                      key: 'diff-' + this.getFilteredFileUrl()
-                  }, {
-                      data: newUrls,
-                      key: 'urls-' + this.getFilteredFileUrl()
-                  }, {
-                      data: JSON.stringify(urlsDiff),
-                      key: 'urls-diff-' + this.getFilteredFileUrl()
-                  }], (err) => {
-                      return error(err);
-                  }, (response) => {
-                      success(response);
+                    data: JSON.stringify(urlsDiff),
+                    key: 'urls-diff-' + this.getFilteredFileUrl()
                   });
-              }
-          });
-      });
+                }
+                this.bulkWriteToBucket(filesToWrite,(err) => {
+                    return error(err);
+                }, (response) => {
+                    success({
+                      modified: true,
+                      numLinesModified: numLinesModified,
+                      numUrlLinesModified: numUrlLinesModified,
+                      diff: diff,
+                      urlsDiff: urlsDiff
+                    });
+                });
+            }
+        });
+    });
   }
 }
 

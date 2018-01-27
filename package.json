@@ -2,6 +2,7 @@
   "name": "file-change-monitor",
   "main": "server.js",
   "dependencies": {
+    "@sendgrid/mail": "^6.2.1",
     "async": "^1.5.2",
     "aws-sdk": "^2.163.0",
     "bcryptjs": "^2.4.3",
@@ -20,6 +21,7 @@
     "morgan": "^1.9.0",
     "mz": "^2.7.0",
     "net": "^1.0.2",
+    "node-cron": "^1.2.1",
     "nodemailer": "^2.3.0",
     "paranoid-request": "^1.1.0",
     "satellizer": "~0.11",
