@@ -205,6 +205,7 @@ FileSchema.methods = {
                     return error(err);
                 }, (response) => {
                     success({
+                      file: this,
                       modified: true,
                       numLinesModified: numLinesModified,
                       numUrlLinesModified: numUrlLinesModified,

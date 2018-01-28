@@ -31,12 +31,19 @@ module.exports = {
   randomInt: function(min,max) {
     return Math.floor(Math.random()*(max-min+1)+min);
   },
-  sendUpdateEmail: function(to, url, fileResponse) {
+  sendUpdateEmail: function(to, fileResponse) {
+    let html =`<h3>An update has been detected for ${fileResponse.file.url}.</h3>
+<p>Changes to relative urls:</p>
+<pre>${this.getFormattedDiff(fileResponse.urlsDiff)}</pre>
+<p>Changes to text:</p>
+<pre>${this.getFormattedDiff(fileResponse.diff)}</pre>
+<p><a href='https://filechangemonitor.herokuapp.com/file/${fileResponse.file.id}'>View the file on File Change Monitor.</a></p>
+`;
     const msg = {
       to: to,
       from: process.env.FROM_EMAIL,
-      subject: '[FileChangeMonitor] Update for ' + url,
-      html: '<strong>There has been an update for ' + url + ' </strong>',
+      subject: '[FileChangeMonitor] Update for ' + fileResponse.file.url,
+      html: html,
     };
     sgMail.send(msg).then(() => {
       console.log('Email sent successfully to ' + to)
@@ -44,5 +51,21 @@ module.exports = {
       //Log friendly error
       console.error(error.toString());
     });;
+  },
+  getFormattedDiff(diff) {
+    let formattedDiff = '';
+    for (diffString of diff) {
+      if (diffString.added) {
+        formattedDiff += '<span style="color:green">' + this.filterString(diffString.value) + '</span>';
+      } else if (diffString.removed) {
+        formattedDiff += '<span style="color:red">' + this.filterString(diffString.value) + '</span>';
+      } else {
+        // formattedDiff += diffString.value;
+      }
+    }
+    return formattedDiff;
+  },
+  filterString(string) {
+    return string.replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 }

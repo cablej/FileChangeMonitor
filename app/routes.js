@@ -10,9 +10,10 @@ var CronJob = require('cron').CronJob;
 
 // Poll periodically to check for changes in files
 // runs every minute
-new CronJob('0,15,30,45 * * * * *', function() {
+new CronJob('0 * * * * *', function() {
   // First, we need to decide which files to poll for updates.
   var time = Math.floor(new Date().getTime() / 1000);
+  console.log('STARTING CRON');
   File.find()
   .select('+pollOffset')
   .exec((err, response) => {
@@ -21,13 +22,12 @@ new CronJob('0,15,30,45 * * * * *', function() {
       var pollMinutes = Math.floor(file.pollTime / 60);
       var offsetMinutes = Math.floor(file.pollOffset / 60);
       if (numMinutes % pollMinutes == offsetMinutes) {
+        console.log('Checking file for changes: ' + file.url);
         if (file._id != '5a6bc5bb40cfd04ea96ccf9a') continue;
-        console.log("we're rolling")
         file.reloadFile(false, (err) => {
           console.log(err);
         }, (fileResponse) => {
           if (!fileResponse.modified) return;
-          console.log(fileResponse);
           if ((file.notifyThresholdUnit == 'characters' && fileResponse.numLinesModified >= file.notifyThreshold)
                || file.notifyThresholdUnit == 'urls' && fileResponse.numUrlLinesModified >= file.notifyThreshold) {
             User.findOne({ _id: file.user}, (userErr, user) => {
@@ -35,9 +35,7 @@ new CronJob('0,15,30,45 * * * * *', function() {
                 console.log(userErr);
                 return;
               }
-              console.log(user)
-              console.log('and we are off!')
-              helperMethods.sendUpdateEmail(user.email, file.url, fileResponse)
+              helperMethods.sendUpdateEmail(user.email, fileResponse)
             });
           }
         });
