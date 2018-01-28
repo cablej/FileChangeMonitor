@@ -41,7 +41,6 @@ new CronJob('0 * * * * *', function() {
       var offsetMinutes = Math.floor(file.pollOffset / 60);
       if (numMinutes % pollMinutes == offsetMinutes) {
         console.log('Checking file for changes: ' + file.url);
-        if (file._id != '5a6bc5bb40cfd04ea96ccf9a') continue;
         file.reloadFile(false, (err) => {
           console.log(err);
         }, (fileResponse) => {
