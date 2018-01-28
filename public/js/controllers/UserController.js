@@ -9,19 +9,25 @@ angular.module('UserController', []).controller('UserController', function($scop
   };
 
   this.signup = function() {
+    this.loading = true;
     $auth.signup({
       username: this.user.username,
       email: this.user.email,
       password: this.user.password
     }).catch((error) => {
+      this.loading = false;
+      this.error = error;
       console.log(error);
     });
   };
 
   this.login = function() {
+    this.loading = true;
     $auth.login({ username: this.user.username, password: this.user.password })
       .then()
       .catch((error) => {
+      this.loading = false;
+      this.error = error;
       console.log(error);
     });
   };

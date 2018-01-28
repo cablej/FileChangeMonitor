@@ -29,8 +29,8 @@
 	  <div class="col-sm-8">
 	    <input ng-model="ctrl.user.confirmPassword" password-match="password" id="confirmPassword" placeholder="Password" type="password" class="form-control"></input>
         <div ng-messages="registerForm.confirmPassword.$error" ng-show="registerForm.confirmPassword.$touched || registerForm.$submitted">
-          <div ng-message="compareTo">Password must match.</div>
-          <div ng-message="required">Password confirmation is required.</div>
+          <!-- <div ng-message="compareTo">Password must match.</div> -->
+          <!-- <div ng-message="required">Password confirmation is required.</div> -->
         </div>
 	  </div>
 	  </div>
@@ -39,6 +39,10 @@
 	      <button type="submit" class="btn special" ng-click="ctrl.signup()" ng-disabled="registerForm.$invalid">Register</button>
 	    </div>
 	  </div>
-	<p>{{ formError }}</p>
+		<span data-ng-show="ctrl.loading">
+			<center><i class="fa fa-spinner fa-spin fa-3x"></i></center>
+		</span>
+		<p ng-if="ctrl.error">{{ctrl.error.data.message}}</p>
+	<!-- <p>{{ formError }}</p> -->
 	</form>
 </div>

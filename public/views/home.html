@@ -1,6 +1,14 @@
-<div class="jumbotron" ng-init="ctrl.fetchAll()">
+<div class="jumbotron" ng-if="!isAuthenticated()">
+<h3>File Change Monitor is a cool new tool that you should be using.</h3>
+<p><i>But why?</i></p>
+<p>It's pretty nifty, trust me. File Change Monitor monitors urls of bug bounty sites and notifies you when new features are added. This way, you'll be the first to test new features for bugs.</p>
+<p><i>Cool! How do I get started?</i></p>
+<p>Click the Register button on the top right.</p>
+<p><i>This site looks very unfinished...</i></p>
+<p>It's in development. Everything is subject to change, including this wonderful introduction right here.</p>
+</div>
+<div class="jumbotron" ng-if="isAuthenticated()" ng-init="ctrl.fetchAll()">
 	<h2>Dashboard</h2>
-
 	<p>Below is a list of your domains.</p>
 	<button class="btn" ui-sref="create">Create</button>
 	<br><br>

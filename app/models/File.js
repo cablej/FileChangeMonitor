@@ -17,7 +17,7 @@ const FileSchema = new mongoose.Schema({
       },
       message: 'Poll time must be at least 1 minute.'
     },
-    default: 3600
+    default: 3600*24
   },
   notifyThreshold: {
     type: Number,

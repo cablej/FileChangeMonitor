@@ -8,6 +8,24 @@ var helperMethods = require('./helperMethods');
 var Promise = require('bluebird');
 var CronJob = require('cron').CronJob;
 
+//testing cronjob to create a testing file
+new CronJob('0 * * * * *', function() {
+  var string = `//super cool js file to query from a server
+var urls = [];
+urls.push('/some_endpoint')`;
+  for (var i = 0; i<3; i++) {
+    var urls = ['admin', 'createUser', 'getUser', 'postUser', 'listThings', 'getThing', 'superVulnerableEndpoint', 'somethingShouldBeHere', 'obsureEndpointThatYouHaveNoIdeaWhatItDoes', 'createSomethingNew', 'rceShell'];
+    var url = urls[Math.floor(Math.random()*urls.length)];
+    string += `\r\nurls.push('/${url}')`
+  }
+  fs.writeFile('public/testingFile.js', string, function(err) {
+    if(err) {
+        return console.log(err);
+    }
+    console.log("The file was saved!");
+  });
+}, null, true, 'America/Chicago');
+
 // Poll periodically to check for changes in files
 // runs every minute
 new CronJob('0 * * * * *', function() {
@@ -42,7 +60,7 @@ new CronJob('0 * * * * *', function() {
       }
     }
   });
-}, null, true, 'America/Los_Angeles');
+}, null, true, 'America/Chicago');
 
 module.exports = function(app) {
 
@@ -124,7 +142,7 @@ module.exports = function(app) {
           return res.status(500).send();
         }
         file.url = req.body.url;
-        file.pollTime = req.body.pollTime || 3600;
+        file.pollTime = req.body.pollTime || 3600*24;
         file.notifyThreshold = req.body.notifyThreshold || 0;
         file.notifyThresholdUnit = req.body.notifyThresholdUnit || 'urls';
         file.save((err) => {

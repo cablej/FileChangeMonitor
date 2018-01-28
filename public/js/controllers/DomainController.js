@@ -1,4 +1,4 @@
-angular.module('DomainController', []).controller('DomainController', function($scope, $state, $stateParams, $window, Domain) {
+angular.module('DomainController', []).controller('DomainController', function($scope, $state, $stateParams, $window, Domain, $auth) {
 
 	this.domains = [];
 
@@ -32,6 +32,9 @@ angular.module('DomainController', []).controller('DomainController', function($
 	this.addMultiple = function() {
 		this.loading = true;
 		this.domain.urls = [];
+		if (this.domain.url) {
+			this.domain.urls.push(this.domain.url);
+		}
 		for (url of this.previewedUrls) {
 			if(url.selected) {
 				this.domain.urls.push(url.url);
@@ -61,7 +64,9 @@ angular.module('DomainController', []).controller('DomainController', function($
 		  });
 	}
 
-	this.previewJSUrls = function() {
+	this.previewJSUrls = function(isNew = false) {
+		if (this.previewedUrls.length > 0 && !isNew) return;
+		if (!this.domain.baseDomain) return;
 		this.loading = true;
 		var baseDomain = this.domain.baseDomain.startsWith('http') ?
 			this.domain.baseDomain : 'http://' + this.domain.baseDomain;
@@ -100,5 +105,19 @@ angular.module('DomainController', []).controller('DomainController', function($
 			  });
 		}
 	}
+
+	this.previewBaseDomain = function() {
+		let commonEndings = ['com', 'net', 'org', 'io', 'us', 'me', 'info'];
+		for (var i = commonEndings.length - 1; i >= 0; i--) {
+			if (this.domain.baseDomain.endsWith('.' + commonEndings[i])) {
+				this.previewJSUrls(true);
+				return;
+			}
+		}
+	}
+
+  $scope.isAuthenticated = function() {
+    return $auth.isAuthenticated();
+  }
 
 });
