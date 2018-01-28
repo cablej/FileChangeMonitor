@@ -1,7 +1,7 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
 var User = require('./User/user.model');
-let paranoid = require("paranoid-request");
+let paranoid = require('request'); //TEMP MOVE TO NORMAL REQUEST, CHANGE BACK TO paranoid-request
 var auth = require('./auth/auth.service');
 var fs = require('fs');
 var helperMethods = require('./helperMethods');

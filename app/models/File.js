@@ -1,5 +1,5 @@
 // grab the mongoose module
-let paranoid = require("paranoid-request");
+let paranoid = require('request');
 let mongoose = require('mongoose');
 let jsdiff = require('diff');
 let AWS = require('aws-sdk');
