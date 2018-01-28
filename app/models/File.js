@@ -96,25 +96,24 @@ FileSchema.methods = {
   },
   // writes an array of multiple data objects to the bucket
   bulkWriteToBucket(dataArray, error, success) {
-    return success({});
-      let dataObject = dataArray.pop();
-      s3.putObject({
-          Bucket: process.env.AWS_BUCKET_NAME,
-          Key: dataObject.key,
-          Body: dataObject.data
-      }, (err, response) => {
-          let responseConstruct = response;
-          if (err) {
-              responseConstruct = { error: err }; //fail silently
-          }
-          if (dataArray.length > 0) {
-              this.bulkWriteToBucket(dataArray, error, (responseArray) => {
-                  success(responseArray.concat(responseConstruct))
-              });
-          } else {
-              success([responseConstruct]);
-          }
-      });
+    let dataObject = dataArray.pop();
+    s3.putObject({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: dataObject.key,
+        Body: dataObject.data
+    }, (err, response) => {
+        let responseConstruct = response;
+        if (err) {
+            responseConstruct = { error: err }; //fail silently
+        }
+        if (dataArray.length > 0) {
+            this.bulkWriteToBucket(dataArray, error, (responseArray) => {
+                success(responseArray.concat(responseConstruct))
+            });
+        } else {
+            success([responseConstruct]);
+        }
+    });
   },
   extractRelativeUrls(data) {
       let stringDelimiters = ['"', '\'', '`'];

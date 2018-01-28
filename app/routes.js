@@ -69,7 +69,6 @@ module.exports = function(app) {
           console.log(err);
           return res.status(500).send();
         }
-        console.log(data)
         urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
         res.status(200).json(urls);
     });
