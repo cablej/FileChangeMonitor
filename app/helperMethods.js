@@ -37,7 +37,7 @@ module.exports = {
 <pre>${this.getFormattedDiff(fileResponse.urlsDiff)}</pre>
 <p>Changes to text:</p>
 <pre>${this.getFormattedDiff(fileResponse.diff)}</pre>
-<p><a href='https://filechangemonitor.herokuapp.com/file/${fileResponse.file.id}'>View the file on File Change Monitor.</a></p>
+<p><a href='https://filechangemonitor.herokuapp.com/file/${fileResponse.file.id}/'>View the file on File Change Monitor.</a></p>
 `;
     const msg = {
       to: to,
