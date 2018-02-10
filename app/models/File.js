@@ -1,5 +1,5 @@
 // grab the mongoose module
-let paranoid = require('request');
+let paranoid = require('paranoid-request');
 let mongoose = require('mongoose');
 let jsdiff = require('diff');
 let AWS = require('aws-sdk');
@@ -141,6 +141,9 @@ FileSchema.methods = {
   },
   reloadFile(isNew, error, success) {
     paranoid.get(this.url, (err, res, newData) => {
+        if (newData && newData.length > process.env.MAX_FILE_SIZE * 10e6) {
+          return error({'error':'File size exceeds MAX_FILE_SIZE.'});
+        }
         if (err) return error(err);
         if (isNew) {
             return this.bulkWriteToBucket([{

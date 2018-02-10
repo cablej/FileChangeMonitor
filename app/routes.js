@@ -1,7 +1,7 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
 var User = require('./User/user.model');
-let paranoid = require('request'); //TEMP MOVE TO NORMAL REQUEST, CHANGE BACK TO paranoid-request
+let paranoid = require('paranoid-request'); //TEMP MOVE TO NORMAL REQUEST, CHANGE BACK TO paranoid-request
 var auth = require('./auth/auth.service');
 var fs = require('fs');
 var helperMethods = require('./helperMethods');
@@ -73,7 +73,7 @@ module.exports = function(app) {
   app.get('/api/domains', auth.ensureAuthenticated, function(req, res) {
     Domain.find({ user: req.user }, (err, response) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         res.status(200).json(response);
@@ -104,7 +104,7 @@ module.exports = function(app) {
           domain.save();
           res.status(200).json(domain);
         }).catch((err) => {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         });
       });
@@ -113,7 +113,7 @@ module.exports = function(app) {
   app.post('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
     Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         domain.name = req.body.name;
@@ -127,7 +127,7 @@ module.exports = function(app) {
       .populate('files')
       .exec((err, response) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         res.status(200).json(response);
@@ -137,7 +137,7 @@ module.exports = function(app) {
   app.post('/api/files/:id', auth.ensureAuthenticated, function(req, res) {
     File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         file.url = req.body.url;
@@ -156,7 +156,7 @@ module.exports = function(app) {
   app.get('/api/files/:id', auth.ensureAuthenticated, function(req, res) {
     File.findOne({ _id: req.params.id, user: req.user }, (err, response) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         res.status(200).json(response);
@@ -166,11 +166,11 @@ module.exports = function(app) {
   app.get('/api/files/:id/fileContents', auth.ensureAuthenticated, function(req, res) {
     File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         file.getRemoteContents((err) => {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }, (data) => {
             res.status(200).json({ 'data': data });
@@ -179,13 +179,17 @@ module.exports = function(app) {
   });
 
   app.post('/api/files/:id/reloadFile', auth.ensureAuthenticated, function(req, res) {
+    // Disable this function in prod
+    if (process.env.NODE_ENV != 'development') {
+      return res.status(500).send();;
+    }
     File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         file.reloadFile(false, (err) => {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }, (data) => {
           res.status(200).json({ 'data': data });
@@ -196,12 +200,12 @@ module.exports = function(app) {
   app.delete('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
     Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         domain.remove((err, response) => {
           if (err) {
-            console.log('Error: ' + err);
+            console.log(err);
             return res.status(500).send();
           }
           res.status(204).end();
@@ -212,12 +216,12 @@ module.exports = function(app) {
   app.delete('/api/files/:id', auth.ensureAuthenticated, function(req, res) {
     File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
         if (err) {
-          console.log('Error: ' + err);
+          console.log(err);
           return res.status(500).send();
         }
         file.remove((err, response) => {
           if (err) {
-            console.log('Error: ' + err);
+            console.log(err);
             return res.status(500).send();
           }
           res.status(204).end();
