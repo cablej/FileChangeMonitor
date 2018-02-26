@@ -19,19 +19,12 @@
 	  <label for="name" class="col-sm-2 control-label">Password</label>
 	  <div class="col-sm-8">
 	    <input ng-model="ctrl.user.password" id="password" placeholder="Password" type="password" class="form-control"></input>
-        <div ng-messages="registerForm.password.$error" ng-show="registerForm.password == '' && !registerForm.password.$pristine">
-          <div ng-message="required">Password is required.</div>
-        </div>
 	  </div>
 	  </div>
 	  <div class="form-group">
 	  <label for="name" class="col-sm-2 control-label">Confirm password</label>
 	  <div class="col-sm-8">
 	    <input ng-model="ctrl.user.confirmPassword" password-match="password" id="confirmPassword" placeholder="Password" type="password" class="form-control"></input>
-        <div ng-messages="registerForm.confirmPassword.$error" ng-show="registerForm.confirmPassword.$touched || registerForm.$submitted">
-          <!-- <div ng-message="compareTo">Password must match.</div> -->
-          <!-- <div ng-message="required">Password confirmation is required.</div> -->
-        </div>
 	  </div>
 	  </div>
 	  <div class="form-group">
@@ -42,7 +35,7 @@
 		<span data-ng-show="ctrl.loading">
 			<center><i class="fa fa-spinner fa-spin fa-3x"></i></center>
 		</span>
-		<p ng-if="ctrl.error">{{ctrl.error.data.message}}</p>
+		<p ng-if="ctrl.error">{{ctrl.error.data.message || ctrl.error}}</p>
 	<!-- <p>{{ formError }}</p> -->
 	</form>
 </div>

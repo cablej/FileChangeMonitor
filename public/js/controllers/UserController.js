@@ -9,6 +9,14 @@ angular.module('UserController', []).controller('UserController', function($scop
   };
 
   this.signup = function() {
+    console.log(this.user)
+    if (! this.user.password || this.user.password == '') {
+      this.error = 'Password is required';
+      return;
+    } else if (this.user.password != this.user.confirmPassword) {
+      this.error = 'Passwords must match.';
+      return;
+    }
     this.loading = true;
     $auth.signup({
       username: this.user.username,

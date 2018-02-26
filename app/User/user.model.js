@@ -4,7 +4,7 @@ var validator = require('validator');
 
 var userSchema = new mongoose.Schema({
   username: { type: String, unique: true, lowercase: true },
-  email: { type: String, lowercase: true },
+  email: { type: String, lowercase: true, unique: true },
   password: { type: String, select: false },
   resetPasswordToken: { type: String, select: false },
   resetPasswordTokenExpiration: { type: Date, select: false }
