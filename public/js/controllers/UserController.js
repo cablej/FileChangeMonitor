@@ -8,6 +8,16 @@ angular.module('UserController', []).controller('UserController', function($scop
       .catch(loginErrorHandler);
   };
 
+  this.fetch = function() {
+    User.fetch()
+    .then((response) => {
+      this.user = response.data;
+    }).catch((error) => {
+      this.error = error;
+      console.log(error);
+    });
+  }
+
   this.signup = function() {
     console.log(this.user)
     if (! this.user.password || this.user.password == '') {

@@ -14,6 +14,18 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      controller: 'UserController',
 	      controllerAs: 'ctrl'
 	    })
+    .state('account', {
+	      url: '/account',
+	      templateUrl: 'views/account.html',
+	      controller: 'UserController',
+	      controllerAs: 'ctrl'
+	    })
+    .state('billing', {
+	      url: '/billing',
+	      templateUrl: 'views/billing.html',
+	      controller: 'UserController',
+	      controllerAs: 'ctrl'
+	    })
     .state('logout', {
 	      url: '/logout',
 	      template: null,
@@ -42,6 +54,12 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      url: '/file/:id/',
 	      templateUrl: 'views/viewFile.html',
 	      controller: 'FileController',
+	      controllerAs: 'ctrl'
+	    })
+		.state('addFile', {
+	      url: '/domain/:id/addFile',
+	      templateUrl: 'views/addFile.html',
+	      controller: 'DomainController',
 	      controllerAs: 'ctrl'
 	    })
 		.state('editFile', {

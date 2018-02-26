@@ -1,7 +1,7 @@
 var Domain = require('./models/Domain');
 var File = require('./models/File');
 var User = require('./User/user.model');
-let paranoid = require('paranoid-request'); //TEMP MOVE TO NORMAL REQUEST, CHANGE BACK TO paranoid-request
+let paranoid = require('paranoid-request');
 var auth = require('./auth/auth.service');
 var fs = require('fs');
 var helperMethods = require('./helperMethods');
@@ -95,12 +95,56 @@ module.exports = function(app) {
     Domain.create({
       name: req.body.name,
       user: req.user
-    }, (err, domain) => {
+    })
+    .populate('user')
+    .exec((err, domain) => {
+      if (domain.user.numFiles + req.body.urls.length > domain.user.maximumFiles) {
+        res.status(500).json({ 'error': 'This would exceed your file limit.' });
+      }
+      var files = [];
+      for (url of req.body.urls) {
+        files.push(domain.addFile(url));
+      }
+      Promise.all(files).then(() => {
+        domain.user.updateFileCount();
+        domain.save();
+        res.status(200).json(domain);
+      }).catch((err) => {
+        console.log(err);
+        return res.status(500).send();
+      });
+    });
+  });
+
+  app.post('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
+    Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send();
+      }
+      domain.name = req.body.name;
+      domain.save();
+      res.status(200).json(domain);
+    });
+  });
+
+  app.post('/api/domains/:id/addFiles', auth.ensureAuthenticated, function(req, res) {
+    Domain.findOne({ _id: req.params.id, user: req.user })
+      .populate('user')
+      .exec((err, domain) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).send();
+        }
+        if (domain.user.numFiles + req.body.urls.length > domain.user.maximumFiles) {
+          res.status(500).json({ 'error': 'This would exceed your file limit.' });
+        }
         var files = [];
         for (url of req.body.urls) {
           files.push(domain.addFile(url));
         }
         Promise.all(files).then(() => {
+          domain.user.updateFileCount();
           domain.save();
           res.status(200).json(domain);
         }).catch((err) => {
@@ -110,22 +154,12 @@ module.exports = function(app) {
       });
   });
 
-  app.post('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
-    Domain.findOne({ _id: req.params.id, user: req.user }, (err, domain) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).send();
-        }
-        domain.name = req.body.name;
-        domain.save();
-        res.status(200).json(domain);
-      });
-  });
-
   app.get('/api/domains/:id', auth.ensureAuthenticated, function(req, res) {
     Domain.findOne({ _id: req.params.id, user: req.user })
-      .populate('files')
+      .populate('files user')
       .exec((err, response) => {
+        console.log(response.user)
+        response.user.updateFileCount();
         if (err) {
           console.log(err);
           return res.status(500).send();
@@ -181,7 +215,7 @@ module.exports = function(app) {
   app.post('/api/files/:id/reloadFile', auth.ensureAuthenticated, function(req, res) {
     // Disable this function in prod
     if (process.env.NODE_ENV != 'development') {
-      return res.status(500).send();;
+      return res.status(500).send();
     }
     File.findOne({ _id: req.params.id, user: req.user }, (err, file) => {
         if (err) {

@@ -1,0 +1,11 @@
+<div class="jumbotron" ng-init="ctrl.fetch()">
+  <h2>My Account</h2>
+  <h3>Account Details</h3>
+  <p>Username: {{ctrl.user.username}}<p>
+  <p>Email: {{ctrl.user.email}}</p>
+  <h3>Payment</h3>
+  <p>Current plan: {{ctrl.user.currentPlan}}</p>
+  <p>Number of files used: {{ctrl.user.numFiles}}/{{ctrl.user.maximumFiles}}</p>
+  <p>Minimum fetch interval: 3 days</p>
+  <button class="btn" ui-sref="billing">Configure Payment</button>
+</div>

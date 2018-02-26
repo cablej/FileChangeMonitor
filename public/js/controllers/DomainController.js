@@ -51,6 +51,20 @@ angular.module('DomainController', []).controller('DomainController', function($
 		  });
 	}
 
+	this.updateFiles = function() {
+		this.loading = true;
+		this.domain.urls = [this.domain.url];
+		Domain.addFiles(this.domain)
+		  .then(response => {
+		     $state.go('viewDomain', { id: this.domain._id });
+		  })
+		  .catch((error) => {
+		  	this.loading = false;
+		  	$scope.formError = error.data.message;
+		    console.log(error)
+		  });
+	}
+
 	this.update = function() {
 		this.loading = true;
 		Domain.update(this.domain)
@@ -88,6 +102,7 @@ angular.module('DomainController', []).controller('DomainController', function($
 		Domain.fetchOne($stateParams.id)
 		  .then(response => {
 		  	this.domain = response.data;
+		  	this.domain.url = this.domain.name;
 		  })
 		  .catch((error) => {
 		    console.log(error)

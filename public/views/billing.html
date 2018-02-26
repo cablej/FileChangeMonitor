@@ -1,0 +1,15 @@
+<div class="jumbotron" ng-init="ctrl.fetch();">
+  <h2>Billing</h2>
+  <form ng-if="ctrl.user" class="form-horizontal">
+    <braintree-dropin options="{paymentMethodNonceReceived: ctrl.createBraintreeSubscription}"></braintree-dropin>
+
+
+    <div class="form-group">
+      <div class="col-sm-12">
+        <br>
+        <button class="btn special">Update Subscription</button>
+        <button type="button" class="btn btn-default" ui-sref="account">Back</button>
+      </div>
+    </div>
+  </form>
+</div>

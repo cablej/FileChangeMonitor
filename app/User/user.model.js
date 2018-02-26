@@ -1,13 +1,24 @@
 var bcrypt = require('bcryptjs');
 var mongoose = require('mongoose');
 var validator = require('validator');
+var File = require('../models/File');
+var Promise = require("bluebird");
 
 var userSchema = new mongoose.Schema({
   username: { type: String, unique: true, lowercase: true },
   email: { type: String, lowercase: true, unique: true },
   password: { type: String, select: false },
+  numFiles: { type: Number, default: 0 },
+  maximumFiles: { type: Number, default: 10 },
+  currentPlan: { type: String, default: 'free'},
   resetPasswordToken: { type: String, select: false },
-  resetPasswordTokenExpiration: { type: Date, select: false }
+  resetPasswordTokenExpiration: { type: Date, select: false },
+  braintree: {
+    customerId: String,
+    subscriptionId: String,
+    subscriptionStatus: String,
+    subscriptionStarted: String
+  }
 });
 
 userSchema.path('username').validate((username) => {
@@ -32,10 +43,24 @@ userSchema.pre('save', function(next) {
   });
 });
 
-userSchema.methods.comparePassword = function(password, done) {
-  bcrypt.compare(password, this.password, function(err, isMatch) {
-    done(err, isMatch);
-  });
-};
+userSchema.methods = {
+  comparePassword(password, done) {
+    bcrypt.compare(password, this.password, function(err, isMatch) {
+      done(err, isMatch);
+    });
+  },
+  updateFileCount() {
+    return new Promise((resolve, reject) => {
+      File.count({
+          user: this._id
+      }, (err, numFiles) => {
+        if (err) return reject(err);
+        this.numFiles = numFiles;
+        this.save();
+        resolve(this);
+      });
+    });
+  }
+}
 
 module.exports = mongoose.model('User', userSchema);
