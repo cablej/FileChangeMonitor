@@ -19,6 +19,19 @@ function validationError(res, err) {
 }
 
 router.get('/braintree/clientToken', auth.ensureAuthenticated, braintreeClientToken);
+router.post('/braintree/createSubscription', auth.ensureAuthenticated, function(req, res, next) {
+  User.findById(req.user, function(err, user) {
+    req.user = user;
+    createBraintreeSubscription(req, res, next);
+  });
+});
+router.post('/braintree/cancelSubscription', auth.ensureAuthenticated, , function(req, res, next) {
+  User.findById(req.user, function(err, user) {
+    req.user = user;
+    cancelBraintreeSubscription(req, res, next);
+  });
+});
+router.post('/braintree/webhook', braintreeWebhook);
 
 /*
 * Return a user's own profile
@@ -84,8 +97,6 @@ router.put('/me', auth.ensureAuthenticated, function(req, res) {
  */
 function braintreeClientToken(req, res, next) {
   braintreeGateway.clientToken.generate({}, (err, response) => {
-    console.log(response)
-    console.log(err)
     res.send(response.clientToken);
   });
 }
@@ -95,15 +106,13 @@ function braintreeClientToken(req, res, next) {
  */
 function createBraintreeSubscription(req, res, next) {
   let nonce = req.body.payment_method_nonce;
-  utils.cleanRequest(req, blacklistRequestAttributes);
 
   // update if already created
-  if (req.user.braintree.customerId
+  if (req.user.braintree && req.user.braintree.customerId
     && req.user.braintree.customerId !== ''
     && (req.user.braintree.status == 'new' || req.user.braintree.status == 'Active')) {
     braintreeGateway.customer.update(req.user.braintree.customerId, {
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
+      firstName: req.user.username,
       email: req.user.email,
       paymentMethodNonce: nonce
     }, (err, result) => {
@@ -122,8 +131,7 @@ function createBraintreeSubscription(req, res, next) {
     });
   } else { //otherwise, create a new account
     braintreeGateway.customer.create({
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
+      firstName: req.user.username,
       email: req.user.email,
       paymentMethodNonce: nonce
     }, (err, result) => {
@@ -134,14 +142,15 @@ function createBraintreeSubscription(req, res, next) {
           paymentMethodToken: token,
           planId: process.env.BRAINTREE_PLAN_ID
         }, (subErr, subResult) => {
-          console.log(subResult);
-          req.user.braintree = {};
-          req.user.braintree.customerId = result.customer.id;
-          req.user.braintree.subscriptionId = subResult.subscription.id;
-          req.user.braintree.subscriptionStatus = 'new';
-          req.user.braintree.subscriptionStarted = subResult.subscription.createdAt;
+          console.log(result);
+          req.user.braintree = {
+            customerId: result.customer.id,
+            subscriptionId: subResult.subscription.id,
+            subscriptionStatus: 'new',
+            subscriptionStarted: subResult.subscription.createdAt
+          };
+          req.user.currentPlan = 'paid';
 
-          req.user.freeTrialEnds = subResult.subscription.firstBillingDate;
           req.user.save();
           res.status(200).end();
         });
@@ -158,11 +167,8 @@ function cancelBraintreeSubscription(req, res, next) {
     braintreeGateway.subscription.cancel(req.user.braintree.subscriptionId, (err, result) => {
       if (!err) {
         req.user.braintree.subscriptionStatus = 'userCanceled';
-        let randomEmail = crypto.randomBytes(32).toString('base64') + '@archived.com';
-        req.user.archivedEmail = req.user.email;
-        req.user.email = randomEmail;
-        req.user.archivedPhoneNumber = req.user.phoneNumber;
-        req.user.phoneNumber = '';
+        req.user.currentPlan = 'free';
+        // TODO: insert logic to prevent user from going over domain limit
         req.user.save();
         res.status(200).send();
       } else {

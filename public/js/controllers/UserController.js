@@ -50,6 +50,32 @@ angular.module('UserController', []).controller('UserController', function($scop
     });
   };
 
+
+  /**
+   * Creates a braintree subscription
+   */
+  this.createBraintreeSubscription = function(event, nonce) {
+    angular.element(document.body).injector().get('User').createBraintreeSubscription(nonce)
+      .then((response) => {
+        window.location = '/account';
+      })
+      .catch((error) => {
+        window.location = '/account';
+      });
+  }
+
+  /**
+   * Cancels a braintree subscription
+   */
+  this.cancelBraintreeSubscription = function() {
+    User.cancelBraintreeSubscription().then((response) => {
+        this.$state.go('account');
+      })
+      .catch((error) => {
+        this.$state.go('account');
+      });
+  }
+
   $scope.isAuthenticated = function() {
     return $auth.isAuthenticated();
   }
