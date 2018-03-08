@@ -17,3 +17,5 @@ node_modules
 .env
 
 public/testingFile.js
+
+package-lock.json

@@ -137,7 +137,7 @@ module.exports = function(app) {
           return res.status(500).send();
         }
         if (domain.user.numFiles + req.body.urls.length > domain.user.maximumFiles) {
-          res.status(500).json({ 'error': 'This would exceed your file limit.' });
+          return res.status(500).json({ 'message': 'This would exceed your file limit.' });
         }
         var files = [];
         for (url of req.body.urls) {

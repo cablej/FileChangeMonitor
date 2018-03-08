@@ -53,7 +53,7 @@ angular.module('DomainController', []).controller('DomainController', function($
 
 	this.updateFiles = function() {
 		this.loading = true;
-		this.domain.urls = [this.domain.url];
+		this.domain.urls = [this.domain.newUrl];
 		Domain.addFiles(this.domain)
 		  .then(response => {
 		     $state.go('viewDomain', { id: this.domain._id });

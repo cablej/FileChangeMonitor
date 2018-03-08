@@ -5,9 +5,20 @@ var auth = require('../auth/auth.service');
 var User = require('./user.model');
 var request = require('request');
 
+const braintree = require('braintree');
+const braintreeGateway = braintree.connect({
+  environment: process.env.BRAINTREE_TYPE == 'production' ? braintree.Environment.Production
+   : braintree.Environment.Sandbox,
+  merchantId: process.env.BRAINTREE_MERCHANT_ID,
+  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+  privateKey: process.env.BRAINTREE_PRIVATE_KEY
+});
+
 function validationError(res, err) {
   res.status(422).json(err);
 }
+
+router.get('/braintree/clientToken', auth.ensureAuthenticated, braintreeClientToken);
 
 /*
 * Return a user's own profile
@@ -66,5 +77,121 @@ router.put('/me', auth.ensureAuthenticated, function(req, res) {
     }
   });
 });
+
+
+/**
+ * Returns the braintree client token
+ */
+function braintreeClientToken(req, res, next) {
+  braintreeGateway.clientToken.generate({}, (err, response) => {
+    console.log(response)
+    console.log(err)
+    res.send(response.clientToken);
+  });
+}
+
+/**
+ * Creates a braintree subscription for the user
+ */
+function createBraintreeSubscription(req, res, next) {
+  let nonce = req.body.payment_method_nonce;
+  utils.cleanRequest(req, blacklistRequestAttributes);
+
+  // update if already created
+  if (req.user.braintree.customerId
+    && req.user.braintree.customerId !== ''
+    && (req.user.braintree.status == 'new' || req.user.braintree.status == 'Active')) {
+    braintreeGateway.customer.update(req.user.braintree.customerId, {
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      email: req.user.email,
+      paymentMethodNonce: nonce
+    }, (err, result) => {
+      if (!err && result.success) {
+        let token = result.customer.paymentMethods[0].token;
+
+        braintreeGateway.subscription.update(req.user.braintree.subscriptionId, {
+          paymentMethodToken: token
+        }, (subErr, subResult) => {
+          req.user.braintree.customerId = result.customer.id;
+          req.user.braintree.subscriptionId = subResult.subscription.id;
+          req.user.save();
+          res.status(200).end();
+        });
+      }
+    });
+  } else { //otherwise, create a new account
+    braintreeGateway.customer.create({
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      email: req.user.email,
+      paymentMethodNonce: nonce
+    }, (err, result) => {
+      if (!err && result.success) {
+        let token = result.customer.paymentMethods[0].token;
+
+        braintreeGateway.subscription.create({
+          paymentMethodToken: token,
+          planId: process.env.BRAINTREE_PLAN_ID
+        }, (subErr, subResult) => {
+          console.log(subResult);
+          req.user.braintree = {};
+          req.user.braintree.customerId = result.customer.id;
+          req.user.braintree.subscriptionId = subResult.subscription.id;
+          req.user.braintree.subscriptionStatus = 'new';
+          req.user.braintree.subscriptionStarted = subResult.subscription.createdAt;
+
+          req.user.freeTrialEnds = subResult.subscription.firstBillingDate;
+          req.user.save();
+          res.status(200).end();
+        });
+      }
+    });
+  }
+}
+
+/**
+ * Creates a braintree subscription for the user
+ */
+function cancelBraintreeSubscription(req, res, next) {
+  if (req.user.braintree.subscriptionId) {
+    braintreeGateway.subscription.cancel(req.user.braintree.subscriptionId, (err, result) => {
+      if (!err) {
+        req.user.braintree.subscriptionStatus = 'userCanceled';
+        let randomEmail = crypto.randomBytes(32).toString('base64') + '@archived.com';
+        req.user.archivedEmail = req.user.email;
+        req.user.email = randomEmail;
+        req.user.archivedPhoneNumber = req.user.phoneNumber;
+        req.user.phoneNumber = '';
+        req.user.save();
+        res.status(200).send();
+      } else {
+        res.status(500).send();
+      }
+    });
+  } else {
+    res.status(403).send();
+  }
+}
+
+/**
+ * The webhook for processing braintree requests
+ */
+function braintreeWebhook(req, res, next) {
+  braintreeGateway.webhookNotification.parse(
+    req.body.bt_signature,
+    req.body.bt_payload,
+    (err, webhookNotification) => {
+      if (webhookNotification.subscription) {
+        User.findOne({ 'braintree.subscriptionId': webhookNotification.subscription.id })
+          .then(user => {
+            user.braintree.subscriptionStatus = webhookNotification.subscription.status;
+            user.save();
+          });
+      }
+    }
+  );
+  res.status(200).send();
+}
 
 module.exports = router;

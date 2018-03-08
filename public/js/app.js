@@ -10,8 +10,11 @@ angular.module('app',
 		'UserController',
 		'LogoutController',
 		'User',
-		'satellizer'
+		'satellizer',
+		'braintree-angular'
 	])
+
+	.constant('clientTokenPath', '/user/braintree/clientToken')
 
 	.config(function($authProvider) {
 		
