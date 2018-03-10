@@ -25,7 +25,7 @@ router.post('/braintree/createSubscription', auth.ensureAuthenticated, function(
     createBraintreeSubscription(req, res, next);
   });
 });
-router.post('/braintree/cancelSubscription', auth.ensureAuthenticated, , function(req, res, next) {
+router.post('/braintree/cancelSubscription', auth.ensureAuthenticated, function(req, res, next) {
   User.findById(req.user, function(err, user) {
     req.user = user;
     cancelBraintreeSubscription(req, res, next);
