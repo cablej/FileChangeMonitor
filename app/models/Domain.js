@@ -25,7 +25,10 @@ DomainSchema.methods = {
     addFile(url) {
       return new Promise((resolve, reject) => {
         File.create({
-            url: url,
+            url: url.url,
+            dynamic: url.dynamic || false,
+            baseUrl: url.baseUrl || '',
+            baseDomain: url.baseDomain || '',
             user: this.user
         }, (err, file) => {
           this.files.push(file);

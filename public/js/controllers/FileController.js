@@ -39,7 +39,7 @@ angular.module('FileController', []).controller('FileController', function($scop
             this.fileContents[2] = '<i>Empty file</i>';
           }
           //format file diff
-          this.fileContents[3] = this.formatDiff(this.fileContents[1]);
+          this.fileContents[3] = this.formatDiff(this.fileContents[3]);
         } else {
           this.fileContents = response.data.data;
 
@@ -50,7 +50,7 @@ angular.module('FileController', []).controller('FileController', function($scop
           }
 
           //format relative url diff
-          this.fileContents[1] = this.formatDiff(this.fileContents[3]);
+          this.fileContents[1] = this.formatDiff(this.fileContents[1]);
 
         }
 

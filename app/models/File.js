@@ -38,6 +38,9 @@ const FileSchema = new mongoose.Schema({
     type: Number,
     select: false
   },
+  dynamic: Boolean,
+  baseUrl: String,
+  baseDomain: String,
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 

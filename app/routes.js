@@ -41,25 +41,51 @@ new CronJob('0 * * * * *', function() {
       var offsetMinutes = Math.floor(file.pollOffset / 60);
       if (numMinutes % pollMinutes == offsetMinutes) {
         console.log('Checking file for changes: ' + file.url);
-        file.reloadFile(false, (err) => {
-          console.log(err);
-        }, (fileResponse) => {
-          if (!fileResponse.modified) return;
-          if ((file.notifyThresholdUnit == 'characters' && fileResponse.numLinesModified >= file.notifyThreshold)
-               || file.notifyThresholdUnit == 'urls' && fileResponse.numUrlLinesModified >= file.notifyThreshold) {
-            User.findOne({ _id: file.user}, (userErr, user) => {
-              if (userErr) {
-                console.log(userErr);
-                return;
+        if (file.dynamic) {
+          // If dynamic, fetch the base domain and see if the file name has changed
+          paranoid.get(file.baseDomain, (err, res, data) => {
+            if (err || !data) return;
+            var urls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
+            var foundUrl = '';
+            for (url of urls) {
+              if (url.includes(file.baseUrl)) {
+                foundUrl = url;
+                break;
               }
-              helperMethods.sendUpdateEmail(user.email, fileResponse)
-            });
-          }
-        });
+            }
+
+            if(foundUrl != '' && foundUrl != file.url) {
+              // url has been updated, proceed as usual
+              file.url = foundUrl;
+              file.save();
+              reloadFileAndNotifyUser(file);
+            }
+          });
+        } else {
+          reloadFileAndNotifyUser(file);
+        }
       }
     }
   });
 }, null, true, 'America/Chicago');
+
+function reloadFileAndNotifyUser(file) {
+  file.reloadFile(false, (err) => {
+    console.log(err);
+  }, (fileResponse) => {
+    if (!fileResponse.modified) return;
+    if ((file.notifyThresholdUnit == 'characters' && fileResponse.numLinesModified >= file.notifyThreshold)
+         || file.notifyThresholdUnit == 'urls' && fileResponse.numUrlLinesModified >= file.notifyThreshold) {
+      User.findOne({ _id: file.user}, (userErr, user) => {
+        if (userErr) {
+          console.log(userErr);
+          return;
+        }
+        helperMethods.sendUpdateEmail(user.email, fileResponse)
+      });
+    }
+  });
+}
 
 module.exports = function(app) {
 
@@ -82,12 +108,12 @@ module.exports = function(app) {
 
   app.post('/api/domains/previewJSUrls', auth.ensureAuthenticated, function(req, res) {
     paranoid.get(req.body.url, (err, newRes, data) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).send();
-        }
-        urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
-        res.status(200).json(urls);
+      if (err) {
+        console.log(err);
+        return res.status(500).send();
+      }
+      urls = helperMethods.extractUrls(req.body.url, data, 'script', 'src=', '.js');
+      res.status(200).json(urls);
     });
   });
 
@@ -149,7 +175,9 @@ module.exports = function(app) {
         }
         var files = [];
         for (url of req.body.urls) {
-          files.push(domain.addFile(url));
+          files.push(domain.addFile({
+            url: url
+          }));
         }
         Promise.all(files).then(() => {
           domain.user.updateFileCount();
