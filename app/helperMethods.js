@@ -21,9 +21,17 @@ module.exports = {
     if (url.startsWith('//')) {
       return 'https' + url; 
     } else if (url.startsWith('/')) {
-      return baseDomain + url;
+      if (baseDomain.lastIndexOf('/') == -1 || baseDomain.lastIndexOf('/') == baseDomain.indexOf('//') + 1) {
+        return baseDomain + url;
+      } else {
+        return baseDomain.substring(0, baseDomain.lastIndexOf('/')) + url;
+      }
     } else if(!url.startsWith('http')) {
-      return baseDomain + '/' + url;
+      if (baseDomain.lastIndexOf('/') == -1 || baseDomain.lastIndexOf('/') == baseDomain.indexOf('//') + 1) {
+        return baseDomain + '/' + url;
+      } else {
+        return baseDomain.substring(0, baseDomain.lastIndexOf('/')) + '/' + url;
+      }
     } else {
       return url;
     }
@@ -55,6 +63,9 @@ module.exports = {
   getFormattedDiff(diff) {
     let formattedDiff = '';
     for (diffString of diff) {
+      // concat diffString
+      trimmedValue = diffString.substring(0, 100);
+      if (diffString.length > 100) trimmedValue += '...';
       if (diffString.added) {
         formattedDiff += '<span style="color:green">' + this.filterString(diffString.value) + '</span>';
       } else if (diffString.removed) {
