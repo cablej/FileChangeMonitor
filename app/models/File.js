@@ -140,11 +140,18 @@ FileSchema.methods = {
       for (delimiter of stringDelimiters) {
           let segments = data.split(delimiter + '/');
           for (let i=1; i < segments.length; i++) { // begin at item 1
-              let url = segments[i].substring(0, segments[i].indexOf(delimiter));
-              urls.add('/' + url);
+            let endDelimiters = ['"', '\'', '`', '>', '<', ',', '\\', '}', '{', '[', ']', '*', '|'];
+            let minIndex = segments[i].length;
+            for (let j=0; j < endDelimiters.length; j++) {
+              let index = segments[i].indexOf(endDelimiters[j]);
+              if (index != -1 && index < minIndex) minIndex = index;
+            }
+            let url = segments[i].substring(0, minIndex);
+            if (url == '' || url == '/') continue;
+            urls.add('/' + url);
           }
       }
-      return  Array.from(urls);
+      return Array.from(urls);
   },
   numLinesModified(diff) {
     let numLinesModified = 0;
