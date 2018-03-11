@@ -56,20 +56,36 @@ FileSchema.methods = {
   },
   // returns a promise of the contents of the remotely stored file
   // TODO: actually return a promise?
-  getRemoteContents(error, success) {
-      this.bulkReadFromBucket([{
-          key: this.getFilteredFileUrl()
-      }, {
-          key: 'diff-' + this.getFilteredFileUrl()
-      }, {
+  getRemoteContents(error, success, type = 'all') {
+    let files;
+    if (type == 'all') {
+      files = [{
           key: 'urls-' + this.getFilteredFileUrl()
       }, {
           key: 'urls-diff-' + this.getFilteredFileUrl()
-      }], (err) => {
-          error(err);
-      }, (data) => {
-          success(data);
-      });
+      }, {
+        key: this.getFilteredFileUrl()
+      }, {
+        key: 'diff-' + this.getFilteredFileUrl()
+      }];
+    } else if (type == 'urls') {
+      files = [{
+          key: 'urls-' + this.getFilteredFileUrl()
+      }, {
+          key: 'urls-diff-' + this.getFilteredFileUrl()
+      }];
+    } else {
+      files = [{
+        key: this.getFilteredFileUrl()
+      }, {
+        key: 'diff-' + this.getFilteredFileUrl()
+      }];
+    }
+    this.bulkReadFromBucket(files, (err) => {
+        error(err);
+    }, (data) => {
+        success(data);
+    });
   },
   // returns contents of arrays of files
   bulkReadFromBucket(keyArray, error, success) {
@@ -165,7 +181,7 @@ FileSchema.methods = {
         this.getRemoteContents((err) => {
             return error(err);
         }, (originalDataArray) => {
-            let originalData = originalDataArray[0] //TODO: check for error here
+            let originalData = originalDataArray[2] //TODO: check for error here
             if (typeof originalData !== 'string') originalData = '';
             if (newData == originalData) { // file has not been modified, return
                 console.log('File has not been modified.');
@@ -180,7 +196,7 @@ FileSchema.methods = {
             let diff = jsdiff.diffLines(originalData, newData);
             let numLinesModified = this.numLinesModified(diff);
 
-            let originalUrls = originalDataArray[2]; // location of the url file
+            let originalUrls = originalDataArray[0]; // location of the url file
             if (typeof originalUrls !== 'string') originalUrls = '';
             let newUrls = this.extractRelativeUrls(newData).join('\n')
             let urlsDiff = jsdiff.diffLines(originalUrls, newUrls);

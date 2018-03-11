@@ -8,8 +8,8 @@ angular.module('File', []).service('File', ['$http', function($http) {
     return $http.post('/api/files/' + object._id, object);
   }
 
-  this.fetchFileContents = function(id) {
-    return $http.get('/api/files/' + id + '/fileContents');
+  this.fetchFileContents = function(all, id) {
+    return $http.get('/api/files/' + id + '/fileContents?all=' + all);
   }
 
   this.reloadFile = function(id) {

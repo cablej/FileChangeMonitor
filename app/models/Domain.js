@@ -6,7 +6,7 @@ let AWS = require('aws-sdk');
 var Promise = require("bluebird");
 
 const DomainSchema = new mongoose.Schema({
-    name: { type : String, default: ''},
+    name: { type : String, default: '', sparse: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }]
 });

@@ -92,26 +92,34 @@ module.exports = function(app) {
   });
 
   app.post('/api/domains', auth.ensureAuthenticated, function(req, res) {
-    Domain.create({
-      name: req.body.name,
-      user: req.user
-    })
-    .populate('user')
-    .exec((err, domain) => {
-      if (domain.user.numFiles + req.body.urls.length > domain.user.maximumFiles) {
-        res.status(500).json({ 'error': 'This would exceed your file limit.' });
-      }
-      var files = [];
-      for (url of req.body.urls) {
-        files.push(domain.addFile(url));
-      }
-      Promise.all(files).then(() => {
-        domain.user.updateFileCount();
-        domain.save();
-        res.status(200).json(domain);
-      }).catch((err) => {
+    User.findById(req.user, function(err, user) {
+      if (err || !user) {
         console.log(err);
         return res.status(500).send();
+      }
+      Domain.create({
+        name: req.body.name,
+        user: req.user
+      }, (err, domain) => {
+        if (err || !domain) {
+          console.log(err);
+          return res.status(500).send();
+        }
+        if (user.numFiles + req.body.urls.length > user.maximumFiles) {
+          res.status(500).json({ 'error': 'This would exceed your file limit.' });
+        }
+        var files = [];
+        for (url of req.body.urls) {
+          files.push(domain.addFile(url));
+        }
+        Promise.all(files).then(() => {
+          user.updateFileCount();
+          domain.save();
+          res.status(200).json(domain);
+        }).catch((err) => {
+          console.log(err);
+          return res.status(500).send();
+        });
       });
     });
   });
@@ -208,7 +216,7 @@ module.exports = function(app) {
           return res.status(500).send();
         }, (data) => {
             res.status(200).json({ 'data': data });
-        });
+        }, req.query.all);
       });
   });
 

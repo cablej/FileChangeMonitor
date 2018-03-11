@@ -1,4 +1,4 @@
-<div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents()">
+<div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents('urls')">
 	<h2>File Information</h2>
 
 	<p><a href="{{ctrl.file.url}}" target="_blank">{{ctrl.file.url}}</a></p>
@@ -21,7 +21,7 @@
 				</div>
 				<div id="urls" class="">
 					<div class="panel-body">
-						<pre ng-bind-html="ctrl.fileContents.data[2] | to_trusted"></pre>
+						<pre ng-bind-html="ctrl.fileContents[0] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
@@ -35,12 +35,15 @@
 				</div>
 				<div id="urls-diff" class="">
 					<div class="panel-body">
-						<pre ng-bind-html="ctrl.fileContents.data[3] | to_trusted"></pre>
+						<pre ng-bind-html="ctrl.fileContents[1] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="panel-group" id="accordion">
+		<div>
+		<a ng-if="ctrl.fileContents.length <= 2" ng-click="ctrl.fetchFileContents('full')" style="cursor:pointer">Load full file contents</a>
+		</div>
+		<div ng-if="ctrl.fileContents.length > 2" class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
@@ -49,12 +52,12 @@
 				</div>
 				<div id="contents" class="">
 					<div class="panel-body">
-						<pre ng-bind-html="ctrl.fileContents.data[0] | to_trusted"></pre>
+						<pre ng-bind-html="ctrl.fileContents[2] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="panel-group" id="accordion">
+		<div ng-if="ctrl.fileContents.length > 2" class="panel-group" id="accordion">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="panel-title">
@@ -63,7 +66,7 @@
 				</div>
 				<div id="contents-diff" class="">
 					<div class="panel-body">
-						<pre ng-bind-html="ctrl.fileContents.data[1] | to_trusted"></pre>
+						<pre ng-bind-html="ctrl.fileContents[3] | to_trusted"></pre>
 					</div>
 				</div>
 			</div>

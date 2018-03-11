@@ -20,31 +20,39 @@ angular.module('FileController', []).controller('FileController', function($scop
       })
       .catch((error) => {
         this.loading = false;
-        $scope.formError = error.data.message;
+        $scope.formError = error.message;
         console.log(error)
       });
   }
 
-  this.fetchFileContents = function() {
+  this.fetchFileContents = function(all) {
     this.loading = true;
-    File.fetchFileContents($stateParams.id)
+    File.fetchFileContents(all, $stateParams.id)
       .then(response => {
-        this.fileContents = response.data;
 
-        this.fileContents.data[0] = this.filterString(this.fileContents.data[0]);
-        this.fileContents.data[2] = this.filterString(this.fileContents.data[2]);
+        if (all == 'full') {
+          this.fileContents = this.fileContents.concat(response.data.data);
+          console.log(this.fileContents)
+          this.fileContents[2] = this.filterString(this.fileContents[2]);
 
-        if(this.fileContents.data[0].trim() == '') {
-          this.fileContents.data[0] = '<i>Empty file</i>';
+          if(this.fileContents[2].trim() == '') {
+            this.fileContents[2] = '<i>Empty file</i>';
+          }
+          //format file diff
+          this.fileContents[3] = this.formatDiff(this.fileContents[1]);
+        } else {
+          this.fileContents = response.data.data;
+
+          this.fileContents[0] = this.filterString(this.fileContents[0]);
+
+          if(this.fileContents[0].trim() == '') {
+            this.fileContents[0] = '<i>No relative urls found</i>';
+          }
+
+          //format relative url diff
+          this.fileContents[1] = this.formatDiff(this.fileContents[3]);
+
         }
-        if(this.fileContents.data[2].trim() == '') {
-          this.fileContents.data[2] = '<i>No relative urls found</i>';
-        }
-
-        //format relative url diff
-        this.fileContents.data[1] = this.formatDiff(this.fileContents.data[1]);
-        //format file diff
-        this.fileContents.data[3] = this.formatDiff(this.fileContents.data[3]);
 
         this.loading = false;
       })
@@ -56,7 +64,7 @@ angular.module('FileController', []).controller('FileController', function($scop
   this.reloadFile = function() {
     File.reloadFile($stateParams.id)
       .then(response => {
-        this.fileContents = response.data;
+        $window.location.reload();
       })
       .catch((error) => {
         console.log(error)
