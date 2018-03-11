@@ -8,7 +8,8 @@
   <tr><th>Url</th><th>Actions</th></tr>
   <tr ng-repeat="url in ctrl.domain.files">
     <td class="col-md-8">
-      {{ url.url }}
+      <span ng-if="url.dynamic"><span style="margin-right: 10px;">{{url.baseUrl + '*.js'}}</span><ng-click="url.dynamic = !url.dynamic" class="fa alt fa-bolt" title="Dynamic file name" data-toggle="tooltip" data-placement="right" tooltip></i></span>
+      <span ng-if="!url.dynamic">{{url.url}}</span>
     </td>
     <td class="col-md-4">
       <button ui-sref="viewFile({ id: url._id })" class="btn">View</button>

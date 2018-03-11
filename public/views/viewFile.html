@@ -1,7 +1,8 @@
 <div class="jumbotron" ng-init="ctrl.fetchOne(); ctrl.fetchFileContents('urls')">
 	<h2>File Information</h2>
+	<p ng-if="ctrl.file.dynamic"><a href="{{ctrl.file.url}}" style="margin-right:10px" target="_blank">{{ctrl.file.baseUrl + '*.js'}}</a><i ng-if="ctrl.file.dynamic" ng-click="url.dynamic = !url.dynamic" class="fa alt fa-bolt" title="Dynamic file name" data-toggle="tooltip" data-placement="right" tooltip></i></p>
 
-	<p><a href="{{ctrl.file.url}}" target="_blank">{{ctrl.file.url}}</a></p>
+	<p ng-if="!ctrl.file.dynamic"><a href="{{ctrl.file.url}}" target="_blank">{{ctrl.file.url}}</a></p>
 	<p>File ID: {{ctrl.file._id}}</p>
 	<p>Poll time: {{ctrl.file.pollTime}}</p>
 	<p>Notify threshold: {{ctrl.file.notifyThreshold}}</p>
