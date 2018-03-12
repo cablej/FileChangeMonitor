@@ -48,7 +48,7 @@ new CronJob('0 * * * * *', function() {
             var urls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
             var foundUrl = '';
             for (url of urls) {
-              if (url.includes(file.baseUrl)) {
+              if (url.includes(file.baseUrl.split('/').pop())) {
                 foundUrl = url;
                 break;
               }
