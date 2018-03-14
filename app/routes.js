@@ -36,6 +36,7 @@ new CronJob('0 * * * * *', function() {
   .select('+pollOffset')
   .exec((err, response) => {
     for (file of response) {
+      console.log(file)
       var numMinutes = Math.floor(time / 60);
       var pollMinutes = Math.floor(file.pollTime / 60);
       var offsetMinutes = Math.floor(file.pollOffset / 60);
@@ -48,7 +49,9 @@ new CronJob('0 * * * * *', function() {
             var urls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
             var foundUrl = '';
             for (url of urls) {
+              console.log('testing ' + url)
               if (url.includes(file.baseUrl.split('/').pop())) {
+                console.log('found url' + foundUrl);
                 foundUrl = url;
                 break;
               }
@@ -56,8 +59,9 @@ new CronJob('0 * * * * *', function() {
 
             if(foundUrl != '' && foundUrl != file.url) {
               // url has been updated, proceed as usual
-              file.url = foundUrl;
+              file.url = helperMethods.normalizeUrl(file.baseDomain, foundUrl);
               file.save();
+              console.log('reloading')
               reloadFileAndNotifyUser(file);
             }
           });
@@ -70,6 +74,7 @@ new CronJob('0 * * * * *', function() {
 }, null, true, 'America/Chicago');
 
 function reloadFileAndNotifyUser(file) {
+  console.log('here we go')
   file.reloadFile(false, (err) => {
     console.log(err);
   }, (fileResponse) => {

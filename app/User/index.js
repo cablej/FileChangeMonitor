@@ -184,11 +184,13 @@ function cancelBraintreeSubscription(req, res, next) {
  * The webhook for processing braintree requests
  */
 function braintreeWebhook(req, res, next) {
+  console.log(req.body)
   braintreeGateway.webhookNotification.parse(
     req.body.bt_signature,
     req.body.bt_payload,
     (err, webhookNotification) => {
-      if (webhookNotification.subscription) {
+      console.log(webhookNotification);
+      if (webhookNotification && webhookNotification.subscription) {
         User.findOne({ 'braintree.subscriptionId': webhookNotification.subscription.id })
           .then(user => {
             user.braintree.subscriptionStatus = webhookNotification.subscription.status;
