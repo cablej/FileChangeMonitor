@@ -36,7 +36,6 @@ new CronJob('0 * * * * *', function() {
   .select('+pollOffset')
   .exec((err, response) => {
     for (file of response) {
-      console.log(file)
       var numMinutes = Math.floor(time / 60);
       var pollMinutes = Math.floor(file.pollTime / 60);
       var offsetMinutes = Math.floor(file.pollOffset / 60);
@@ -45,14 +44,20 @@ new CronJob('0 * * * * *', function() {
         if (file.dynamic) {
           // If dynamic, fetch the base domain and see if the file name has changed
           paranoid.get(file.baseDomain, (err, res, data) => {
+            // TO DO: FIX RACE CONDITION
             if (err || !data) return;
+            console.log(file)
             var urls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
             var foundUrl = '';
             for (url of urls) {
               console.log('testing ' + url)
-              if (url.includes(file.baseUrl.split('/').pop())) {
-                console.log('found url' + foundUrl);
+              var split = file.baseUrl.split('/');
+              console.log(split);
+              var fileName = split.pop();
+              console.log('name ' + fileName);
+              if (url.includes(fileName)) {
                 foundUrl = url;
+                console.log('found url' + foundUrl);
                 break;
               }
             }

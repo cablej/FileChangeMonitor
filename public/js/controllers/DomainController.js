@@ -1,4 +1,4 @@
-angular.module('DomainController', []).controller('DomainController', function($scope, $state, $stateParams, $window, Domain, $auth) {
+angular.module('DomainController', []).controller('DomainController', function($scope, $state, $stateParams, $window, Domain, File, $auth) {
 
 	this.domains = [];
 
@@ -125,6 +125,18 @@ angular.module('DomainController', []).controller('DomainController', function($
 			Domain.delete(id)
 				.then(response => {
 					this.domains = this.domains.filter((domain) => domain._id !== id);
+			  })
+			  .catch((error) => {
+			    console.log(error)
+			  });
+		}
+	}
+
+	this.deleteFile = function(id) {
+		if ($window.confirm('Delete this file?')) {
+			File.delete(id)
+				.then(response => {
+					this.domain.files = this.domain.files.filter((file) => file._id !== id);
 			  })
 			  .catch((error) => {
 			    console.log(error)

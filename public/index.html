@@ -50,6 +50,12 @@
 
 	<!-- ANGULAR DYNAMIC CONTENT -->
 	<div ui-view></div>
+		<nav class="navbar navbar" ng-controller="UserController">
+		<ul class="nav navbar-nav pull-right">
+			<li ui-sref="terms"><a>Terms of Service</a></li>
+			<li ui-sref="privacy"><a>Privacy Policy</a></li>
+		</ul>
+	</nav>
 
 </div>
 </body>

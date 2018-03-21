@@ -64,12 +64,12 @@ module.exports = {
     let formattedDiff = '';
     for (diffString of diff) {
       // concat diffString
-      trimmedValue = diffString.substring(0, 100);
+      trimmedValue = diffString.value.substring(0, 100);
       if (diffString.length > 100) trimmedValue += '...';
       if (diffString.added) {
-        formattedDiff += '<span style="color:green">' + this.filterString(diffString.value) + '</span>';
+        formattedDiff += '<span style="color:green">' + this.filterString(trimmedValue) + '</span>';
       } else if (diffString.removed) {
-        formattedDiff += '<span style="color:red">' + this.filterString(diffString.value) + '</span>';
+        formattedDiff += '<span style="color:red">' + this.filterString(trimmedValue) + '</span>';
       } else {
         // formattedDiff += diffString.value;
       }

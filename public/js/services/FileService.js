@@ -8,6 +8,10 @@ angular.module('File', []).service('File', ['$http', function($http) {
     return $http.post('/api/files/' + object._id, object);
   }
 
+  this.delete = function(id) {
+    return $http.delete('/api/files/' + id);
+  }
+
   this.fetchFileContents = function(all, id) {
     return $http.get('/api/files/' + id + '/fileContents?all=' + all);
   }

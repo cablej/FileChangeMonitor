@@ -38,6 +38,16 @@ angular.module('appRoutes', []).config(['$routeProvider', '$locationProvider', '
 	      controller: 'DomainController',
 	      controllerAs: 'ctrl'
 	    })
+		// terms - static
+		.state('terms', {
+	      url: '/terms',
+	      templateUrl: 'views/terms.html',
+	    })
+		// privacy - static
+		.state('privacy', {
+	      url: '/privacy',
+	      templateUrl: 'views/privacy.html',
+	    })
 		.state('viewDomain', {
 	      url: '/domain/:id/',
 	      templateUrl: 'views/viewDomain.html',
