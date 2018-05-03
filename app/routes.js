@@ -35,29 +35,25 @@ new CronJob('0 * * * * *', function() {
   File.find()
   .select('+pollOffset')
   .exec((err, response) => {
-    for (file of response) {
+    response.forEach(function(file, index) {
       var numMinutes = Math.floor(time / 60);
       var pollMinutes = Math.floor(file.pollTime / 60);
       var offsetMinutes = Math.floor(file.pollOffset / 60);
+      // TODO: Replace calculation with database-level query using $mod
       if (numMinutes % pollMinutes == offsetMinutes) {
         console.log('Checking file for changes: ' + file.url);
         if (file.dynamic) {
           // If dynamic, fetch the base domain and see if the file name has changed
           paranoid.get(file.baseDomain, (err, res, data) => {
-            // TO DO: FIX RACE CONDITION
             if (err || !data) return;
             console.log(file)
-            var urls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
+            var pageUrls = helperMethods.extractUrls(file.baseDomain, data, 'script', 'src=', '.js');
             var foundUrl = '';
-            for (url of urls) {
-              console.log('testing ' + url)
-              var split = file.baseUrl.split('/');
-              console.log(split);
-              var fileName = split.pop();
-              console.log('name ' + fileName);
+            for (url of pageUrls) {
+              // Compute the name of the file, i.e. the part after the last slash
+              var fileName = file.baseUrl.split('/').pop();
               if (url.includes(fileName)) {
                 foundUrl = url;
-                console.log('found url' + foundUrl);
                 break;
               }
             }
@@ -66,7 +62,7 @@ new CronJob('0 * * * * *', function() {
               // url has been updated, proceed as usual
               file.url = helperMethods.normalizeUrl(file.baseDomain, foundUrl);
               file.save();
-              console.log('reloading')
+              console.log('Change detected in filename. New name: ' + file.url);
               reloadFileAndNotifyUser(file);
             }
           });
@@ -74,15 +70,15 @@ new CronJob('0 * * * * *', function() {
           reloadFileAndNotifyUser(file);
         }
       }
-    }
+    });
   });
 }, null, true, 'America/Chicago');
 
 function reloadFileAndNotifyUser(file) {
-  console.log('here we go')
   file.reloadFile(false, (err) => {
     console.log(err);
   }, (fileResponse) => {
+    console.log('Checking for changes: ' + file.url);
     if (!fileResponse.modified) return;
     if ((file.notifyThresholdUnit == 'characters' && fileResponse.numLinesModified >= file.notifyThreshold)
          || file.notifyThresholdUnit == 'urls' && fileResponse.numUrlLinesModified >= file.notifyThreshold) {

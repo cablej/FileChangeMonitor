@@ -19,7 +19,7 @@ module.exports = {
   },
   normalizeUrl: function(baseDomain, url) {
     if (url.startsWith('//')) {
-      return 'https' + url; 
+      return 'https:' + url; 
     } else if (url.startsWith('/')) {
       if (baseDomain.lastIndexOf('/') == -1 || baseDomain.lastIndexOf('/') == baseDomain.indexOf('//') + 1) {
         return baseDomain + url;
