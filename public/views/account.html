@@ -7,7 +7,7 @@
   <p>Current plan: {{ctrl.user.currentPlan}}</p>
   <div ng-if="ctrl.user.currentPlan == 'paid'">
     <p>Plan details:</p>
-    <p>$7 per month, started {{ctrl.user.braintree.subscriptionStarted | date}}</p>
+    <p>$5 per month, started {{ctrl.user.braintree.subscriptionStarted | date}}</p>
     <button class="btn" ui-sref="billing">Update Subscription</button><br><br>
     <button class="btn" ng-click="ctrl.cancelBraintreeSubscription()">Cancel Subscription</button><br><br>
   </div>
