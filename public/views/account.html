@@ -5,7 +5,12 @@
   <p>Email: {{ctrl.user.email}}</p>
   <h3>Payment</h3>
   <p>Current plan: {{ctrl.user.currentPlan}}</p>
+  <div ng-if="ctrl.user.currentPlan == 'paid'">
+    <p>Plan details:</p>
+    <p>$7 per month, started {{ctrl.user.braintree.subscriptionStarted | date}}</p>
+    <button class="btn" ng-click="ctrl.cancelBraintreeSubscription()">Cancel Subscription</button><br><br>
+  </div>
   <p>Number of files used: {{ctrl.user.numFiles}}/{{ctrl.user.maximumFiles}}</p>
-  <p>Minimum fetch interval: 3 days</p>
+  <p>Minimum fetch interval: 24 hours</p>
   <button class="btn" ui-sref="billing">Configure Payment</button>
 </div>

@@ -23,8 +23,8 @@
 	  	<input type="checkbox" id="check{{$index}}" ng-model="url.selected" style="margin-left:200px; margin-right:20px"></input> 
 	  	<label for="check{{$index}}" style="margin-right:10px" ng-if="!url.dynamic">{{url.url}}</label>
 	  	<label for="check{{$index}}" style="margin-right:10px" ng-if="url.dynamic">{{url.baseUrl + '*.js'}}</label>
-	  	<i ng-if="!url.dynamic" ng-click="url.dynamic = !url.dynamic" class="fa alt fa-sync" title="We detected that this is a standard file. Want to instead check for changes in the file name? Just click the icon." data-toggle="tooltip" data-placement="right" tooltip></i>
-	  	<i ng-if="url.dynamic" ng-click="url.dynamic = !url.dynamic" class="fa alt fa-bolt" title="We detected that this is a dynamic file name, so we'll check for changes in the file name instead. Not a dynamic file name? Just click the icon." data-toggle="tooltip" data-placement="right" tooltip></i>
+	  	<i style="cursor:pointer" ng-if="!url.dynamic" ng-click="url.dynamic = !url.dynamic" class="fa alt fa-sync" title="We detected that this is a standard file. Want to instead check for changes in the file name? Just click the icon." data-toggle="tooltip" data-placement="right" tooltip></i>
+	  	<i style="cursor:pointer" ng-if="url.dynamic" ng-click="url.dynamic = !url.dynamic" class="fa alt fa-bolt" title="We detected that this is a dynamic file name, so we'll check for changes in the file name instead. Not a dynamic file name? Just click the icon." data-toggle="tooltip" data-placement="right" tooltip></i>
 	  </div>
 	  <div class="form-group">
 	  <label for="url" class="col-sm-2 control-label">(Optional) Add another url</label>
