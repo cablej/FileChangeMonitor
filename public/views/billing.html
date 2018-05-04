@@ -1,8 +1,8 @@
 <div class="jumbotron" ng-init="ctrl.fetch();">
   <h2>Billing</h2>
+  <p>File Change Monitor is $5 a month to monitor up to 100 urls (this is to pay for hosting), and you can cancel at any time for no charge. If you don't want to pay for the hosted version, File Change Monitor is open-sourced on Github: <a href="https://github.com/cablej/File-Change-Montitor">https://github.com/cablej/File-Change-Montitor</a>.</p>
   <form ng-if="ctrl.user" class="form-horizontal">
     <braintree-dropin options="{paymentMethodNonceReceived: ctrl.createBraintreeSubscription}"></braintree-dropin>
-
 
     <div class="form-group">
       <div class="col-sm-12">

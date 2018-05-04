@@ -124,6 +124,7 @@ function createBraintreeSubscription(req, res, next) {
         }, (subErr, subResult) => {
           req.user.braintree.customerId = result.customer.id;
           req.user.braintree.subscriptionId = subResult.subscription.id;
+          req.user.maximumFiles = process.env.PAID_FILE_LIMIT;
           req.user.save();
           res.status(200).end();
         });
@@ -150,6 +151,7 @@ function createBraintreeSubscription(req, res, next) {
             subscriptionStarted: subResult.subscription.createdAt
           };
           req.user.currentPlan = 'paid';
+          req.user.maximumFiles = process.env.PAID_FILE_LIMIT;
 
           req.user.save();
           res.status(200).end();
@@ -168,7 +170,7 @@ function cancelBraintreeSubscription(req, res, next) {
       if (!err) {
         req.user.braintree.subscriptionStatus = 'userCanceled';
         req.user.currentPlan = 'free';
-        // TODO: insert logic to prevent user from going over domain limit
+        req.user.maximumFiles = process.env.FREE_FILE_LIMIT;
         req.user.save();
         res.status(200).send();
       } else {
@@ -194,6 +196,11 @@ function braintreeWebhook(req, res, next) {
         User.findOne({ 'braintree.subscriptionId': webhookNotification.subscription.id })
           .then(user => {
             user.braintree.subscriptionStatus = webhookNotification.subscription.status;
+            if (webhookNotification.subscription.status != 'new' && webhookNotification.subscription.status != 'active') {
+              user.braintree.subscriptionStatus = 'userCanceled';
+              user.currentPlan = 'free';
+              user.maximumFiles = process.env.FREE_FILE_LIMIT;
+            }
             user.save();
           });
       }

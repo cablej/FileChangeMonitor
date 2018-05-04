@@ -1,11 +1,13 @@
 <div class="jumbotron" ng-if="!isAuthenticated()">
 <h3>Never miss a feature update again.</h3>
 <p>File Change Monitor provides continous monitoring for JavaScript files hosted on websites running bug bounty programs. This way, you'll get an email whenever a change occurs in a website you're monitoring, so you can stay on top of the newest features.</p>
-<p>This website is still under development, so all features may not yet be implemented.</p>
+<h3>Features:</h3>
+
+<h3>Payment:</h3>
 </div>
 <div class="jumbotron" ng-if="isAuthenticated()" ng-init="ctrl.fetchAll()">
 	<h2>Dashboard</h2>
-	<p>Below is a list of your domains.</p>
+	<p>Below is a list of being monitored.</p>
 	<button class="btn" ui-sref="create">Create</button>
 	<br><br>
 	<table class="table table-striped table-bordered">

@@ -68,12 +68,15 @@ angular.module('UserController', []).controller('UserController', function($scop
    * Cancels a braintree subscription
    */
   this.cancelBraintreeSubscription = function() {
-    User.cancelBraintreeSubscription().then((response) => {
-        this.$state.go('account');
-      })
-      .catch((error) => {
-        this.$state.go('account');
-      });
+    if(confirm('Cancel your subscription?')) {
+      this.loading = true;
+      User.cancelBraintreeSubscription().then((response) => {
+          window.location = '/account';
+        })
+        .catch((error) => {
+          window.location = '/account';
+        });
+    }
   }
 
   $scope.isAuthenticated = function() {

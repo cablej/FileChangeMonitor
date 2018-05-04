@@ -8,9 +8,12 @@
   <div ng-if="ctrl.user.currentPlan == 'paid'">
     <p>Plan details:</p>
     <p>$7 per month, started {{ctrl.user.braintree.subscriptionStarted | date}}</p>
+    <button class="btn" ui-sref="billing">Update Subscription</button><br><br>
     <button class="btn" ng-click="ctrl.cancelBraintreeSubscription()">Cancel Subscription</button><br><br>
+  </div>
+  <div ng-if="ctrl.user.currentPlan != 'paid'">
+    <button class="btn" ui-sref="billing">Upgrade to paid account</button><br><br>
   </div>
   <p>Number of files used: {{ctrl.user.numFiles}}/{{ctrl.user.maximumFiles}}</p>
   <p>Minimum fetch interval: 24 hours</p>
-  <button class="btn" ui-sref="billing">Configure Payment</button>
 </div>

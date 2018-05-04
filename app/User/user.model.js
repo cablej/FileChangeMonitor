@@ -9,7 +9,7 @@ var userSchema = new mongoose.Schema({
   email: { type: String, lowercase: true, unique: true },
   password: { type: String, select: false },
   numFiles: { type: Number, default: 0 },
-  maximumFiles: { type: Number, default: 10 },
+  maximumFiles: { type: Number, default: process.env.FREE_FILE_LIMIT },
   currentPlan: { type: String, default: 'free'},
   resetPasswordToken: { type: String, select: false },
   resetPasswordTokenExpiration: { type: Date, select: false },
