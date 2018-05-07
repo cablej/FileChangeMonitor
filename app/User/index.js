@@ -6,13 +6,16 @@ var User = require('./user.model');
 var request = require('request');
 
 const braintree = require('braintree');
-const braintreeGateway = braintree.connect({
-  environment: process.env.BRAINTREE_TYPE == 'production' ? braintree.Environment.Production
-   : braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY
-});
+
+if (process.env.PAYMENT_TYPE == 'braintree') {
+  const braintreeGateway = braintree.connect({
+    environment: process.env.BRAINTREE_TYPE == 'production' ? braintree.Environment.Production
+     : braintree.Environment.Sandbox,
+    merchantId: process.env.BRAINTREE_MERCHANT_ID,
+    publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+    privateKey: process.env.BRAINTREE_PRIVATE_KEY
+  });
+}
 
 function validationError(res, err) {
   res.status(422).json(err);
@@ -96,9 +99,13 @@ router.put('/me', auth.ensureAuthenticated, function(req, res) {
  * Returns the braintree client token
  */
 function braintreeClientToken(req, res, next) {
-  braintreeGateway.clientToken.generate({}, (err, response) => {
-    res.send(response.clientToken);
-  });
+  if (process.env.PAYMENT_TYPE == 'braintree') {
+    braintreeGateway.clientToken.generate({}, (err, response) => {
+      res.send(response.clientToken);
+    });
+  } else {
+    res.status(500).end();
+  }
 }
 
 /**
@@ -106,6 +113,10 @@ function braintreeClientToken(req, res, next) {
  */
 function createBraintreeSubscription(req, res, next) {
   let nonce = req.body.payment_method_nonce;
+
+  if (process.env.PAYMENT_TYPE != 'braintree') {
+    return res.status(500).end();
+  }
 
   // update if already created
   if (req.user.braintree && req.user.braintree.customerId
@@ -165,6 +176,10 @@ function createBraintreeSubscription(req, res, next) {
  * Creates a braintree subscription for the user
  */
 function cancelBraintreeSubscription(req, res, next) {
+  if (process.env.PAYMENT_TYPE != 'braintree') {
+    return res.status(500).end();
+  }
+
   if (req.user.braintree.subscriptionId) {
     braintreeGateway.subscription.cancel(req.user.braintree.subscriptionId, (err, result) => {
       if (!err) {
@@ -186,6 +201,10 @@ function cancelBraintreeSubscription(req, res, next) {
  * The webhook for processing braintree requests
  */
 function braintreeWebhook(req, res, next) {
+  if (process.env.PAYMENT_TYPE != 'braintree') {
+    return res.status(500).end();
+  }
+
   console.log(req.body)
   braintreeGateway.webhookNotification.parse(
     req.body.bt_signature,
