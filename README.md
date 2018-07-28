@@ -6,7 +6,7 @@ File Change Monitor detects changes in JavaScript files, notifying you when new 
 
 ## Hosted Version
 
-For convenience, a hosted version is available at https://filechangemonitor.io. The hosted service is free for up to 10 files and $5 a month for up to 100 files (to pay for hosting costs).
+For convenience, a hosted version is available at https://filechangemonitor.io.
 
 ## Usage
 
